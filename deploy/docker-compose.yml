@@ -1,0 +1,78 @@
+# 《幸福的丝线》全栈一键部署编排
+# 组成：MySQL 8 + Python 后端 (FastAPI+Socket.IO) + Nginx 前端托管
+#
+# 使用方法：
+#   1. 将整个 deploy/ 目录上传到 Linux 服务器
+#   2. 安装 Docker 与 docker compose 插件
+#   3. 执行: docker compose up -d --build
+#   4. 访问: http://服务器IP （或配置域名后访问域名）
+#
+# 常用命令：
+#   查看状态: docker compose ps
+#   查看日志: docker compose logs -f backend
+#   停止:     docker compose down
+#   完全清理: docker compose down -v
+
+version: "3.8"
+
+services:
+  # ==================== MySQL 数据库 ====================
+  mysql:
+    image: mysql:8.0
+    container_name: happy-threads-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-happy_threads_pwd}
+      MYSQL_DATABASE: happy_threads
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # ==================== Python 后端 ====================
+  backend:
+    build:
+      context: ./backend
+    container_name: happy-threads-backend
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-happy_threads_pwd}
+      DB_NAME: happy_threads
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret}
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGIN: "*"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    expose:
+      - "3000"
+
+  # ==================== Nginx 前端 + 反向代理 ====================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: happy-threads-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # 如启用 HTTPS 证书，放开 443 并配置 nginx/conf.d/ssl 配置
+      # - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:

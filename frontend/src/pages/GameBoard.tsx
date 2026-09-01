@@ -1,0 +1,692 @@
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useGameStore } from '../store/gameStore';
+import { connectSocket, getSocket } from '../socket/gameSocket';
+import Board from '../components/Board';
+import CharacterCard from '../components/CharacterCard';
+import MarkerPanel from '../components/MarkerPanel';
+import PhaseIndicator from '../components/PhaseIndicator';
+import TurnTimer from '../components/TurnTimer';
+import DisconnectNotice from '../components/DisconnectNotice';
+import FullscreenButton from '../components/FullscreenButton';
+import RoundRecordsPanel from '../components/RoundRecordsPanel';
+import ActionCardHistory from '../components/ActionCardHistory';
+import ActionCardReveal from '../components/ActionCardReveal';
+import { getAffectedCharIds, charIdToPos } from '../utils/board';
+import { readMarkerDragData } from '../utils/drag';
+import { randomBackground, backgroundUrl, getBackgroundFiles } from '../config/illustrations';
+import type { DeathAction } from '../types';
+
+// ---- 反派行动步骤 ----
+type EvilStep = 'select-card' | 'select-villain' | 'select-target';
+
+export default function GameBoardPage() {
+  const navigate = useNavigate();
+  const store = useGameStore();
+  const {
+    token, roomId, mode, myRole, phase, round, board, handCards,
+    winner, gameStatus, notification, countdown, roundRecords,
+    setNotification, roomInfo, user,
+  } = store;
+
+  // ---- 正派监视 ----
+  const [surveillanceTargets, setSurveillanceTargets] = useState<number[]>([]);
+
+  // ---- 反派行动 ----
+  const [evilStep, setEvilStep] = useState<EvilStep>('select-card');
+  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+  const [selectedVillain, setSelectedVillain] = useState<number | null>(null);
+  // 拖拽中的死亡标记形状（用于实时范围预览；形状由拖动的标记决定）
+  const [dragShape, setDragShape] = useState<'九宫格' | '十字' | null>(null);
+  const [localDeathActions, setLocalDeathActions] = useState<DeathAction[]>([]);
+  // 反派开局确认：是否已查看本局三位反派角色（确认后关闭遮罩）
+  const [villainConfirmed, setVillainConfirmed] = useState(false);
+
+  const roomIdRef = useRef(roomId);
+  const myRoleRef = useRef(myRole);
+  roomIdRef.current = roomId;
+  myRoleRef.current = myRole;
+
+  // ---- Socket 初始化 ----
+  useEffect(() => {
+    if (!roomIdRef.current) { navigate('/'); return; }
+    const t = token || localStorage.getItem('token') || '';
+    const socket = connectSocket(t);
+    const mode = store.mode;
+    const onConnect = () => {
+      if (mode === 'single') {
+        socket.emit('game:single_start', { roomId: roomIdRef.current, role: myRoleRef.current });
+      } else {
+        // 联机模式：进入房间 + 同步状态（匹配/邀请流程已分配阵营）
+        socket.emit('game:sync', { roomId: roomIdRef.current });
+        // 邀请模式：等玩家点「准备」再发 game:ready；匹配模式：进入即准备
+        if (mode !== 'invite') {
+          socket.emit('game:ready', { roomId: roomIdRef.current });
+        }
+      }
+    };
+    if (socket.connected) onConnect();
+    // 每次（重）连接都重新同步：断线后 Socket.IO 自动重连会再次触发 connect，
+    // 从而自动 game:sync 恢复最新状态（修复断线重连后不恢复的 bug）
+    socket.on('connect', onConnect);
+    return () => { socket.off('connect', onConnect); };
+  }, []);
+
+  // ---- 结算导航 ----
+  useEffect(() => {
+    if (gameStatus === 'finished' || winner) {
+      const t = setTimeout(() => navigate('/result'), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [gameStatus, winner, navigate]);
+
+  // ---- 阶段展示缓冲倒计时 ----
+  // 后端在每个阶段结束后广播 countdown（秒），前端本地每秒递减用于展示
+  const [displayCountdown, setDisplayCountdown] = useState(0);
+  useEffect(() => {
+    setDisplayCountdown(countdown);
+    if (countdown <= 0) return;
+    const timer = setInterval(() => {
+      setDisplayCountdown(prev => {
+        if (prev <= 1) { clearInterval(timer); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  // ---- 可行动的反派数量 ----
+  const activeVillains = useMemo(() =>
+    board.filter(c =>
+      c.role === 'evil' && c.status === 'alive' &&
+      !(c.hasSurveillance && c.surveillanceActive)
+    ), [board]
+  );
+
+  // ---- 已用反派 ID ----
+  const usedVillainIds = useMemo(() =>
+    new Set(localDeathActions.map(a => a.villainId)), [localDeathActions]
+  );
+
+  // ---- 当前选卡的最大行动数 ----
+  const maxActions = useMemo(() => {
+    if (selectedCard === null) return 0;
+    const card = handCards.find(c => c.index === selectedCard);
+    if (!card) return 0;
+    return Math.min(card.actions.length, activeVillains.length);
+  }, [selectedCard, handCards, activeVillains]);
+
+  // ---- 卡牌规定的形状及数量（如 {十字:2} / {十字:1, 九宫格:1}） ----
+  const cardShapeCounts = useMemo(() => {
+    if (selectedCard === null) return new Map<string, number>();
+    const card = handCards.find(c => c.index === selectedCard);
+    if (!card) return new Map<string, number>();
+    const counts = new Map<string, number>();
+    for (const a of card.actions) {
+      counts.set(a.shape, (counts.get(a.shape) || 0) + 1);
+    }
+    return counts;
+  }, [selectedCard, handCards]);
+
+  // ---- 已放置标记中使用的形状数量 ----
+  const usedShapeCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const a of localDeathActions) {
+      counts.set(a.shape, (counts.get(a.shape) || 0) + 1);
+    }
+    return counts;
+  }, [localDeathActions]);
+
+  // ---- 剩余可用形状（混合卡两种都能选，纯卡只剩一种） ----
+  const remainingShapes = useMemo(() => {
+    const set = new Set<'九宫格' | '十字'>();
+    for (const [shape, count] of cardShapeCounts) {
+      if (count > (usedShapeCounts.get(shape) || 0)) set.add(shape as '九宫格' | '十字');
+    }
+    return set;
+  }, [cardShapeCounts, usedShapeCounts]);
+
+  // ---- 范围预览（使用玩家当前拖动的形状） ----
+  const rangeIds = useMemo(() => {
+    if (!selectedVillain || !dragShape) return new Set<number>();
+    const pos = charIdToPos(selectedVillain);
+    const ids = getAffectedCharIds(pos.row, pos.col, dragShape);
+    return new Set(ids.filter(id => {
+      const c = board.find(ch => ch.id === id);
+      return c && c.status === 'alive' && c.id !== 403;
+    }));
+  }, [selectedVillain, dragShape, board]);
+
+  // ---- 反派高亮 ID（未用且存活的） ----
+  const villainHighlightIds = useMemo(() => {
+    if (evilStep !== 'select-villain') return new Set<number>();
+    return new Set(activeVillains.filter(v => !usedVillainIds.has(v.id)).map(v => v.id));
+  }, [evilStep, activeVillains, usedVillainIds]);
+
+  // ---- 羽化 ID ----
+  // select-card: 无羽化
+  // select-villain: 非高亮反派角色羽化渐隐（重新启用羽化）
+  // select-target: 拖动中显示范围，范围外羽化；未拖动时不羽化
+  const dimmedIds = useMemo(() => {
+    if (evilStep === 'select-card') return new Set<number>();
+    if (evilStep === 'select-target') {
+      if (!dragShape) return new Set<number>();
+      const result = new Set<number>();
+      for (const c of board) {
+        if (c.status === 'dead' || c.status === 'default_dead') continue;
+        if (!rangeIds.has(c.id)) result.add(c.id);
+      }
+      return result;
+    }
+    const result = new Set<number>();
+    for (const c of board) {
+      if (c.status === 'dead' || c.status === 'default_dead') continue;
+      if (!villainHighlightIds.has(c.id)) result.add(c.id);
+    }
+    return result;
+  }, [evilStep, board, villainHighlightIds, rangeIds, dragShape]);
+
+  // ==================== 正派操作 ====================
+
+  // 正派仅在第一阶段（placement）放置监视标记；第1回合跳过正派行动
+  const canPlaceSurveillance = phase === 'placement' && myRole === 'good' &&
+    (mode === 'single' || mode === 'match' || mode === 'invite');
+  const goodCanSelect = canPlaceSurveillance;
+  const maxSurveillance = 3;
+
+  const handleGoodCharClick = useCallback((charId: number) => {
+    if (!goodCanSelect) return;
+    let next: number[];
+    if (surveillanceTargets.includes(charId)) {
+      next = surveillanceTargets.filter(id => id !== charId);
+    } else if (surveillanceTargets.length < maxSurveillance) {
+      next = [...surveillanceTargets, charId];
+    } else return;
+    setSurveillanceTargets(next);
+  }, [goodCanSelect, maxSurveillance, surveillanceTargets]);
+
+  const submitSurveillance = () => {
+    if (surveillanceTargets.length !== maxSurveillance) {
+      setNotification({
+        type: 'error',
+        message: '请选择3个监视目标',
+      });
+      return;
+    }
+    const sock = getSocket();
+    if (sock) {
+      sock.emit('game:place_surveillance', { roomId, targets: surveillanceTargets });
+    }
+    setSurveillanceTargets([]);
+  };
+
+  // ==================== 反派操作 ====================
+
+  const canPlayAction = phase === 'action' && myRole === 'evil' &&
+    displayCountdown <= 0 &&
+    (mode === 'single' || mode === 'match' || mode === 'invite');
+
+  // ---- 反派是否无可行动（无可用卡 / 无可行动反派 / 无未标记目标）----
+  const evilCannotAct = useMemo(() => {
+    if (!canPlayAction) return false;
+    const hasCard = handCards.some(c => !c.used);
+    const hasTarget = board.some(c =>
+      c.status === 'alive' && c.id !== 403 && !c.hasDeathMarker
+    );
+    return !hasCard || activeVillains.length === 0 || !hasTarget;
+  }, [canPlayAction, handCards, board, activeVillains]);
+
+  const skipEvilAction = () => {
+    const sock = getSocket();
+    if (sock) {
+      sock.emit('game:skip_action', { roomId });
+    }
+    setSelectedCard(null);
+    setLocalDeathActions([]);
+    setEvilStep('select-card');
+    setSelectedVillain(null);
+    setDragShape(null);
+  };
+
+  const handleCardSelect = (index: number) => {
+    if (!canPlayAction) return;
+    const card = handCards.find(c => c.index === index);
+    if (!card || card.used) return;
+    setSelectedCard(index);
+    setEvilStep('select-villain');
+    setSelectedVillain(null);
+    setDragShape(null);
+    setLocalDeathActions([]);
+  };
+
+  const handleVillainSelect = (charId: number) => {
+    if (!canPlayAction || evilStep !== 'select-villain') return;
+    if (!villainHighlightIds.has(charId)) return;
+    setSelectedVillain(charId);
+    setDragShape(null);
+    setEvilStep('select-target');
+  };
+
+  // 拖动死亡标记放置：形状由被拖动的标记决定
+  const placeDeathMarker = useCallback((charId: number, shape: '九宫格' | '十字') => {
+    if (!canPlayAction || evilStep !== 'select-target') return;
+    if (!selectedVillain) return;
+    if (!rangeIds.has(charId)) return; // 只能放在范围内
+
+    const action: DeathAction = {
+      villainId: selectedVillain,
+      targetId: charId,
+      shape,
+    };
+    const newActions = [...localDeathActions, action];
+    setLocalDeathActions(newActions);
+
+    // 重置到选反派步骤，准备下一个行动
+    setSelectedVillain(null);
+    setDragShape(null);
+
+    if (newActions.length >= maxActions) {
+      // 全部完成，回到选卡界面等结束回合
+      // 注意：不能清空 selectedCard，提交「结束回合」时还需要 cardIndex
+      setEvilStep('select-card');
+    } else {
+      setEvilStep('select-villain');
+    }
+  }, [canPlayAction, evilStep, selectedVillain, rangeIds, localDeathActions, maxActions]);
+
+  const submitEvilActions = () => {
+    if (localDeathActions.length !== maxActions) return;
+    const sock = getSocket();
+    if (sock) {
+      sock.emit('game:play_action_card', {
+        roomId, cardIndex: selectedCard, actions: localDeathActions,
+      });
+    }
+    setSelectedCard(null);
+    setLocalDeathActions([]);
+    setEvilStep('select-card');
+    setSelectedVillain(null);
+    setDragShape(null);
+  };
+
+  const cancelEvilAction = () => {
+    if (evilStep === 'select-target') {
+      setEvilStep('select-villain');
+      setSelectedVillain(null);
+      setDragShape(null);
+    } else if (evilStep === 'select-villain') {
+      setEvilStep('select-card');
+      setSelectedCard(null);
+      setSelectedVillain(null);
+      setDragShape(null);
+      setLocalDeathActions([]);
+    }
+  };
+
+  // ---- 拖拽放置目标集合 ----
+  const dropTargetIds = useMemo(() => {
+    if (goodCanSelect) {
+      // 正派：所有存活且非 403 的角色（拖拽监视标记）
+      return new Set(board.filter(c => c.status === 'alive' && c.id !== 403).map(c => c.id));
+    }
+    if (canPlayAction && evilStep === 'select-target') {
+      return rangeIds;
+    }
+    return null;
+  }, [goodCanSelect, canPlayAction, evilStep, board, rangeIds]);
+
+  // ---- 角色卡拖拽放置分派 ----
+  const handleCharacterDrop = useCallback((e: React.DragEvent, charId: number) => {
+    e.preventDefault();
+    const payload = readMarkerDragData(e);
+    if (!payload) return;
+    if (payload.kind === 'surveillance') {
+      handleGoodCharClick(charId);
+    } else if (payload.kind === 'death') {
+      placeDeathMarker(charId, payload.shape);
+    }
+  }, [handleGoodCharClick, placeDeathMarker]);
+
+  const allActionsDone = localDeathActions.length === maxActions && maxActions > 0;
+
+  // ---- 某形状剩余可用次数 ----
+  const getRemainingCount = (shape: '九宫格' | '十字') =>
+    (cardShapeCounts.get(shape) || 0) - (usedShapeCounts.get(shape) || 0);
+
+  // ---- 阶段消息 ----
+  const getPhaseMessage = () => {
+    if (winner) return winner === (myRole === 'good' ? 'good' : 'evil') ? '你赢了!' : '你输了!';
+    if (phase === 'placement' && myRole === 'good') return '拖动监视标记到角色卡';
+    if (phase === 'placement' && myRole === 'evil') return '等待正派放置监视标记...';
+    if (phase === 'reveal') return '公示本回合结果，结算中...';
+    if (canPlayAction) {
+      if (evilStep === 'select-card') {
+        return evilCannotAct ? '无可用行动，请跳过本回合' : '请选择1张行动卡';
+      }
+      if (evilStep === 'select-villain') return '选择行动的反派角色';
+      if (evilStep === 'select-target') return '拖动标记到角色卡';
+    }
+    if (phase === 'action' && myRole === 'good') return '等待反派行动...';
+    return '';
+  };
+
+  const viewerRole = myRole === 'evil' ? 'evil' : null;
+
+  // ---- 等待界面：我方是否已准备 ----
+  const myReady = roomInfo?.players.find(p => p.role === myRole)?.ready ?? false;
+
+  const handleReady = () => {
+    const sock = getSocket();
+    if (sock && roomId) {
+      sock.emit('game:ready', { roomId });
+    }
+  };
+
+  // ---- 正派选中角色（放置监视 / 附加监视） ----
+  const highlightedChars = goodCanSelect ? surveillanceTargets : [];
+
+  // ---- 角色卡交互：反派仅在 select-villain 阶段点击选反派；标记放置统一走拖拽 ----
+  const boardInteractive = goodCanSelect ||
+    (canPlayAction && (evilStep === 'select-villain' || evilStep === 'select-target'));
+  const boardOnClick = canPlayAction && evilStep === 'select-villain' ? handleVillainSelect : () => {};
+
+  const boardArea = (
+    <div className="flex-1 flex overflow-y-auto min-w-[360px]">
+      <motion.div
+        key={`round-${round}-phase-${phase}`}
+        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="m-auto w-full max-w-[672px]"
+      >
+        <Board
+          board={board}
+          viewerRole={viewerRole}
+          selectedCharacters={highlightedChars}
+          onCharacterClick={boardOnClick}
+          interactive={boardInteractive}
+          dimmedIds={dimmedIds}
+          villainHighlightIds={villainHighlightIds}
+          rangeIds={
+            (evilStep === 'select-villain' || evilStep === 'select-target') ? rangeIds : undefined
+          }
+          dropTargetIds={dropTargetIds}
+          onCharacterDrop={handleCharacterDrop}
+        />
+      </motion.div>
+    </div>
+  );
+
+  // 房间背景：优先用用户保存的背景，未设置或"随机"则随机抽取
+  const background = useMemo(() => {
+    const pref = user?.backgroundPref;
+    if (pref && pref !== 'random' && getBackgroundFiles().includes(pref)) {
+      return backgroundUrl(pref);
+    }
+    return randomBackground();
+  }, [user?.backgroundPref]);
+
+  // ---- 反派开局确认界面 ----
+  // 本局三位反派（反派视角 board 已含真实 role）
+  const villainChars = useMemo(() => board.filter(c => c.role === 'evil'), [board]);
+  const showVillainIntro = myRole === 'evil' && !villainConfirmed &&
+    gameStatus === 'playing' && villainChars.length === 3;
+
+  return (
+    <div className="relative w-full h-full overflow-hidden">
+      {/* 背景插画 + 暗色遮罩 */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${background})` }}
+      />
+      <div className="absolute inset-0 bg-black/50" />
+      {/* 内容层 */}
+      <div className="relative z-10 w-full h-full flex flex-col">
+        <FullscreenButton />
+        <DisconnectNotice />
+
+      {/* 通知 */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-sm ${
+              notification.type === 'error' ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+              : notification.type === 'success' ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+              : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}`}>
+            {notification.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 顶部栏 */}
+      <div className="flex-shrink-0 pt-3 px-4 flex items-center justify-center gap-3">
+        <PhaseIndicator phase={phase} round={round} myRole={myRole} message={getPhaseMessage()} />
+        <TurnTimer />
+      </div>
+
+      {/* ===== 阶段展示缓冲倒计时 ===== */}
+      <AnimatePresence>
+        {displayCountdown > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-1.5 rounded-full bg-purple-600/30 border border-purple-500/40 backdrop-blur-sm"
+          >
+            <span className="text-sm font-bold text-purple-200">
+              ⏱ {displayCountdown}s 后进入下一阶段
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 主区域：按角色镜像布局（正派棋盘在右、反派棋盘在左） */}
+      <div className="flex-1 flex items-stretch overflow-x-auto overflow-y-hidden px-2 gap-2">
+        {/* ===== 左侧：回合记录框（公共，可滚动） ===== */}
+        <RoundRecordsPanel records={roundRecords} />
+
+        {myRole === 'good' ? (
+          <>
+            {/* 正派：监视标记面板在左 */}
+            <MarkerPanel
+              role="good"
+              round={round}
+              maxSurveillance={maxSurveillance}
+              surveillancePlaced={surveillanceTargets.length}
+              canPlaceSurveillance={goodCanSelect}
+              onMarkerDragEnd={() => setDragShape(null)}
+            />
+            {/* 棋盘在右 */}
+            {boardArea}
+            {/* 正派视角右侧：行动卡插画公示（复用反派视角的卡面） */}
+            <ActionCardReveal records={roundRecords} />
+          </>
+        ) : (
+          <>
+            {/* 反派：棋盘在左 */}
+            {boardArea}
+            {/* 标记 + 行动卡面板在右 */}
+            <MarkerPanel
+              role="evil"
+              round={round}
+              handCards={handCards}
+              selectedCard={selectedCard}
+              onCardSelect={handleCardSelect}
+              canPlayAction={canPlayAction}
+              remainingShapes={remainingShapes}
+              getRemainingCount={getRemainingCount}
+              onDeathMarkerDragStart={(shape) => setDragShape(shape)}
+              onMarkerDragEnd={() => setDragShape(null)}
+            />
+            {/* 反派视角右侧：行动卡公示历史 */}
+            <ActionCardHistory records={roundRecords} />
+          </>
+        )}
+      </div>
+
+      {/* ===== 底部：提交 / 取消 / 跳过 / 结束 ===== */}
+      <div className="flex-shrink-0 pb-4 px-4 flex justify-center gap-3 items-center">
+        {/* 正派提交（放置监视） */}
+        {goodCanSelect && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 items-center">
+            <span className="text-sm text-gray-400">
+              已选 {surveillanceTargets.length}/{maxSurveillance}
+              {surveillanceTargets.map(id => <span key={id} className="text-blue-400 ml-1">#{id}</span>)}
+            </span>
+            <button className="btn-premium" onClick={submitSurveillance} disabled={surveillanceTargets.length !== maxSurveillance}>
+              确认放置
+            </button>
+          </motion.div>
+        )}
+
+        {/* 反派操作按钮 */}
+        {canPlayAction && (
+          <>
+            {/* 无可行动时：跳过行动 */}
+            {evilCannotAct && evilStep === 'select-card' && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                onClick={skipEvilAction}
+                className="py-3 px-3 rounded-xl text-sm font-bold bg-gray-600 hover:bg-gray-500 text-white transition-all"
+              >
+                跳过行动
+              </motion.button>
+            )}
+
+            {/* 结束回合 */}
+            {allActionsDone && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                onClick={submitEvilActions}
+                className="py-3 px-3 rounded-xl text-sm font-bold bg-red-600 hover:bg-red-500 text-white transition-all shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+              >
+                结束回合
+              </motion.button>
+            )}
+
+            {/* 取消当前选择 */}
+            {evilStep !== 'select-card' && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                className="btn-secondary"
+                onClick={cancelEvilAction}
+              >
+                取消
+              </motion.button>
+            )}
+
+            {/* 当前行动进度 */}
+            {localDeathActions.length > 0 && (
+              <div className="text-[10px] text-gray-400 text-center">
+                已放置 {localDeathActions.length}/{maxActions}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 等待界面（邀请模式，双方准备后开局） */}
+      {gameStatus === 'waiting' && mode === 'invite' && (
+        <div className="absolute inset-0 bg-black/75 flex items-center justify-center z-50">
+          <div className="glass p-8 text-center max-w-sm w-full">
+            <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'var(--font-game)' }}>
+              等待对手
+            </h2>
+            <p className="text-[var(--color-text-dim)] text-sm mb-6">双方都点「准备」后开始对局</p>
+
+            <div className="space-y-3 mb-6 text-left">
+              {(roomInfo?.players ?? []).map(p => {
+                const isMe = p.role === myRole;
+                const roleLabel = p.role === 'good' ? '正派' : '反派';
+                const status = !p.joined ? '未加入' : p.ready ? '已准备' : '已加入';
+                const statusColor = !p.joined ? 'text-gray-500' : p.ready ? 'text-emerald-400' : 'text-amber-400';
+                return (
+                  <div key={p.role} className="flex items-center justify-between rounded-xl px-4 py-3 bg-white/5 border border-white/10">
+                    <div>
+                      <span className="text-white font-bold">{isMe ? '你' : '好友'} · {roleLabel}</span>
+                      {!isMe && p.account && (
+                        <span className="text-xs text-[var(--color-text-dim)] block">{p.account}</span>
+                      )}
+                    </div>
+                    <span className={`text-sm font-bold ${statusColor}`}>{status}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {!myReady ? (
+              <button
+                onClick={handleReady}
+                className="w-full py-4 rounded-xl bg-[#7c3aed] hover:bg-[#8b5cf6] text-white font-bold transition-all"
+              >
+                准备
+              </button>
+            ) : (
+              <div className="text-[var(--color-text-dim)] text-sm">已准备，等待对方...</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== 反派开局确认界面（正派不显示） ===== */}
+      <AnimatePresence>
+        {showVillainIntro && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/85 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', damping: 18 }}
+              className="glass p-8 text-center max-w-xl w-full mx-4"
+            >
+              <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'var(--font-title)' }}>
+                你的反派角色
+              </h2>
+              <p className="text-[var(--color-text-dim)] text-sm mb-8">
+                记住这三位反派，对局中只有你能看到他们的身份
+              </p>
+
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                {villainChars.map(c => (
+                  <CharacterCard
+                    key={c.id}
+                    char={c}
+                    viewerRole="evil"
+                    isSelected={false}
+                    onClick={() => {}}
+                    disabled
+                  />
+                ))}
+              </div>
+
+              <button
+                className="btn-premium w-full"
+                onClick={() => setVillainConfirmed(true)}
+              >
+                确认开始
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 游戏结束遮罩 */}
+      <AnimatePresence>
+        {(gameStatus === 'finished' || winner) && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/60 flex items-center justify-center z-40">
+            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', damping: 15 }} className="glass p-8 text-center">
+              <div className="text-6xl mb-4">{winner === 'good' ? '🛡️' : '👹'}</div>
+              <h2 className={`text-3xl font-bold mb-2 ${winner === 'good' ? 'text-green-400' : 'text-red-400'}`}>
+                {winner === 'good' ? '正派胜利!' : '反派胜利!'}
+              </h2>
+              <p className="text-gray-400 text-sm">正在前往结算界面...</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,35 @@
+# ===== 依赖与构建产物 =====
+frontend/node_modules/
+frontend/dist/
+backend-python/venv/
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+
+# ===== 环境配置（含密钥，不入库）=====
+.env
+.env.*
+!.env.example
+
+# ===== 日志与临时文件 =====
+*.log
+*.tmp
+server_log.txt
+dev_log.txt
+smoke_err.txt
+
+# ===== 编辑器 / 系统文件 =====
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# ===== 部署产物 =====
+*.zip
+*.doc
+*.docx
+
+# ===== WorkBuddy 本地工作数据（不入库）=====
+.workbuddy/
