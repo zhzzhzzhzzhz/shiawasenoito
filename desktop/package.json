@@ -15,7 +15,7 @@
     "appId": "com.happythreads.game",
     "productName": "幸せの糸",
     "directories": {
-      "output": "release"
+      "output": "release2"
     },
     "files": [
       "main.js",
@@ -24,7 +24,8 @@
       "dist/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
     }
   }
 }
