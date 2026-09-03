@@ -32,8 +32,8 @@ function createWindow() {
     },
   });
 
-  // 加载前端构建产物（需先在前端执行 npm run build 生成 dist）
-  win.loadFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+  // 加载前端构建产物（desktop/dist，打包前由 frontend/dist 复制而来）
+  win.loadFile(path.join(__dirname, 'dist', 'index.html'));
 }
 
 app.whenReady().then(() => {

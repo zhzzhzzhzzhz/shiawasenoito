@@ -21,7 +21,7 @@
       "main.js",
       "preload.js",
       "config.json",
-      "../frontend/dist/**/*"
+      "dist/**/*"
     ],
     "win": {
       "target": "nsis"
