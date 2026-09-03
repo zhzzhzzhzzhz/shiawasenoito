@@ -33,3 +33,17 @@ Thumbs.db
 
 # ===== WorkBuddy 本地工作数据（不入库）=====
 .workbuddy/
+
+# ===== 图片/视频压缩备份（原图原视频，不入库）=====
+frontend/placeholder-illust_backup/
+frontend/placeholder-videos_backup/
+
+# ===== 训练数据采集记录（不入库）=====
+backend-python/dataset/*.json
+
+# ===== Electron 桌面壳依赖与产物 =====
+desktop/node_modules/
+desktop/release/
+
+# ===== 嵌套 git 仓库（独立项目，不入库）=====
+shiawasenoito/
