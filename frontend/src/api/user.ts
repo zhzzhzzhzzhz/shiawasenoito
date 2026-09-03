@@ -1,6 +1,5 @@
 import type { ApiResponse, User } from '../types';
-
-const API_BASE = '/api';
+import { API_BASE } from '../config/env';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   const token = localStorage.getItem('token');

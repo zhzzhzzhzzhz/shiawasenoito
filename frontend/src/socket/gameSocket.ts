@@ -1,12 +1,13 @@
 import { io, Socket } from 'socket.io-client';
 import { useGameStore } from '../store/gameStore';
+import { SOCKET_URL } from '../config/env';
 
 let socket: Socket | null = null;
 
 export function connectSocket(token: string): Socket {
   if (socket?.connected) return socket;
 
-  socket = io('/', {
+  socket = io(SOCKET_URL || '/', {
     auth: { token },
     transports: ['websocket', 'polling'],
   });

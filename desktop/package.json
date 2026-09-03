@@ -1,0 +1,30 @@
+{
+  "name": "happy-threads-desktop",
+  "version": "1.0.0",
+  "description": "幸せの糸 桌面版",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.happythreads.game",
+    "productName": "幸せの糸",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "config.json",
+      "../frontend/dist/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
