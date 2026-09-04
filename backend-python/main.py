@@ -16,7 +16,6 @@ from routes.room import router as room_router
 from services.room_manager import room_manager
 from middleware.auth import verify_token
 from services.game_engine import Phase
-from services import recorder
 
 load_dotenv()
 
@@ -60,14 +59,6 @@ async def _room_sids(room_id: str) -> list:
         return []
 
 
-def _maybe_record(session):
-    """RECORD_MATCH=on 且为双人模式时，保存训练记录"""
-    if os.getenv('RECORD_MATCH', 'off').lower() == 'on' and session.mode != 'single':
-        path = recorder.save(session)
-        if path:
-            print(f'[Recorder] 对局记录已保存: {path}')
-
-
 async def broadcast_game_state(room_id: str, extra: dict = None):
     """按玩家角色分别广播游戏状态给房间内所有玩家"""
     session = room_manager.get_room(room_id)
@@ -94,7 +85,6 @@ async def broadcast_game_state(room_id: str, extra: dict = None):
         await sio.emit('game:state', state, to=sid)
 
     if session.status == 'finished':
-        _maybe_record(session)
         await sio.emit('game:result', {
             'winner': session.winner,
             'detail': session.get_record_detail(),
@@ -248,9 +238,6 @@ def maybe_start_turn(room_id: str):
         return
     if session.mode == 'single':
         return
-    # 环境变量 TURN_TIMER=off 时关闭回合倒计时（训练数据采集期，便于真人慢慢决策）
-    if os.getenv('TURN_TIMER', 'on').lower() == 'off':
-        return
     if session.turn_deadline is not None:
         return
     if session.phase == Phase.PLACEMENT and session.good_player_id is not None:
@@ -367,7 +354,6 @@ async def _handle_abandon(room_id: str, player_id: int):
     await sio.emit('game:opponent_left',
                    {'message': '对手断线超时，已判定弃赛', 'abandoned': True},
                    room=room_id)
-    # 弃赛对局不记录训练数据（对局不完整、胜负非自然，避免污染数据集）
     await sio.emit('game:result', {
         'winner': winner,
         'detail': session.get_record_detail(),

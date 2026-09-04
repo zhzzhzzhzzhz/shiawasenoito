@@ -72,7 +72,13 @@ def _good_hard(board, history_rounds, n=3):
 
 
 def _score_plan(plan, marg, suspect_ids, board):
-    """评估监视方案：命中期望 + 分散度 − 反派最优击杀收益。"""
+    """评估监视方案：命中期望 + 分散度 − 反派最优击杀收益。
+
+    注（2026-09-02 实验记录）：曾将击杀惩罚项替换为"反派对抗泄漏度"奖励项，
+    实验证伪——该度量与命中项先天冲突（行动的反派越多泄漏度越大，诱导正派
+    主动放低命中），hard 档胜率从 48% 崩至 14%。已回退。击杀收益惩罚虽模拟
+    旧版反派，但与对抗反派的行为正相关（都避开高嫌疑目标），作为启发式无害。
+    """
     hit = sum(marg.get(x, 0.0) for x in plan)
     rows = {char_id_to_pos(x)['row'] for x in plan}
     cols = {char_id_to_pos(x)['col'] for x in plan}

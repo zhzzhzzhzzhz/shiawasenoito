@@ -154,7 +154,7 @@ export default function GameBoardPage() {
     const ids = getAffectedCharIds(pos.row, pos.col, dragShape);
     return new Set(ids.filter(id => {
       const c = board.find(ch => ch.id === id);
-      return c && c.status === 'alive' && c.id !== 403;
+      return c && c.status === 'alive';
     }));
   }, [selectedVillain, dragShape, board]);
 
@@ -232,7 +232,7 @@ export default function GameBoardPage() {
     if (!canPlayAction) return false;
     const hasCard = handCards.some(c => !c.used);
     const hasTarget = board.some(c =>
-      c.status === 'alive' && c.id !== 403 && !c.hasDeathMarker
+      c.status === 'alive' && !c.hasDeathMarker
     );
     return !hasCard || activeVillains.length === 0 || !hasTarget;
   }, [canPlayAction, handCards, board, activeVillains]);
@@ -327,8 +327,8 @@ export default function GameBoardPage() {
   // ---- 拖拽放置目标集合 ----
   const dropTargetIds = useMemo(() => {
     if (goodCanSelect) {
-      // 正派：所有存活且非 403 的角色（拖拽监视标记）
-      return new Set(board.filter(c => c.status === 'alive' && c.id !== 403).map(c => c.id));
+      // 正派：所有存活角色（403 复活变体下 403 状态为 alive，自然可被监视）
+      return new Set(board.filter(c => c.status === 'alive').map(c => c.id));
     }
     if (canPlayAction && evilStep === 'select-target') {
       return rangeIds;

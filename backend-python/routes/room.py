@@ -21,6 +21,8 @@ class CreateRoomBody(BaseModel):
     mode: str
     aiDifficulty: str = 'normal'
     role: str = 'good'  # 'good' | 'evil' | 'random'
+    aiBackend: str = 'rule'  # 'rule' | 'agent' | 'hybrid'（大脑后端，默认规则 AI）
+    revive403: bool = False  # 403 复活变体（正派困难档）：403 可被标记、可入反派池
 
 
 class JoinRoomBody(BaseModel):
@@ -41,6 +43,8 @@ async def create_room(body: CreateRoomBody, user: dict = Depends(get_optional_us
     room_id = room_manager.create_room({
         'mode': body.mode,
         'aiDifficulty': body.aiDifficulty,
+        'aiBackend': body.aiBackend,
+        'revive403': body.revive403,
         'goodPlayerId': user['id'] if assigned_role == 'good' else None,
         'evilPlayerId': user['id'] if assigned_role == 'evil' else None,
     })

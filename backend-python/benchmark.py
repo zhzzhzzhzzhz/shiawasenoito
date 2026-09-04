@@ -22,10 +22,13 @@ from ai.evil_ai import evil_ai
 DIFFS = ['easy', 'normal', 'hard']
 
 
-def play_game(good_diff, evil_diff):
-    """跑一局，返回 (winner, 决策耗时ms, 命中反派数, 监视决策次数)。"""
-    villains = draw_villains()
-    board = create_initial_board(villains)
+def play_game(good_diff, evil_diff, revive403=False):
+    """跑一局，返回 (winner, 决策耗时ms, 命中反派数, 监视决策次数)。
+
+    revive403=True：403 复活变体（可被标记、可入反派池，25 人候选）。
+    """
+    villains = draw_villains(revive403)
+    board = create_initial_board(villains, revive403)
     hand_cards = get_action_card_pool()
     history = []
 
@@ -52,22 +55,23 @@ def play_game(good_diff, evil_diff):
             if winner:
                 break
 
-        # 阶段2：反派行动
-        t0 = time.perf_counter()
-        action = evil_ai(board, hand_cards, evil_diff, round_num, history)
-        t_total += time.perf_counter() - t0
-        if action:
-            card = next(c for c in hand_cards if c['index'] == action['cardIndex'])
-            card['used'] = True
-            for a in action['actions']:
-                place_death_marker(board, a['villainId'], a['targetId'],
-                                   a['shape'], round_num)
-            history.append({'round': round_num, 'phase': 'action', 'type': 'death',
-                            'cardIndex': action['cardIndex'],
-                            'deathMarkers': action['actions']})
-        else:
-            history.append({'round': round_num, 'phase': 'action',
-                            'type': 'skip', 'reason': 'no_action'})
+        # 阶段2：反派行动（第 6 回合无反派行动阶段，直接结算——与引擎一致）
+        if round_num < 6:
+            t0 = time.perf_counter()
+            action = evil_ai(board, hand_cards, evil_diff, round_num, history)
+            t_total += time.perf_counter() - t0
+            if action:
+                card = next(c for c in hand_cards if c['index'] == action['cardIndex'])
+                card['used'] = True
+                for a in action['actions']:
+                    place_death_marker(board, a['villainId'], a['targetId'],
+                                       a['shape'], round_num)
+                history.append({'round': round_num, 'phase': 'action', 'type': 'death',
+                                'cardIndex': action['cardIndex'],
+                                'deathMarkers': action['actions']})
+            else:
+                history.append({'round': round_num, 'phase': 'action',
+                                'type': 'skip', 'reason': 'no_action'})
 
         # 阶段3：结算
         execute_death_markers(board, round_num)
@@ -106,19 +110,20 @@ def sanity_check():
                 winner = check_win_condition(board, round_num, Phase.PLACEMENT)
                 if winner:
                     break
-            action = evil_ai(board, hand_cards, 'easy', round_num, history)
-            if action:
-                card = next(c for c in hand_cards if c['index'] == action['cardIndex'])
-                card['used'] = True
-                for a in action['actions']:
-                    place_death_marker(board, a['villainId'], a['targetId'],
-                                       a['shape'], round_num)
-                history.append({'round': round_num, 'phase': 'action', 'type': 'death',
-                                'cardIndex': action['cardIndex'],
-                                'deathMarkers': action['actions']})
-            else:
-                history.append({'round': round_num, 'phase': 'action',
-                                'type': 'skip', 'reason': 'no_action'})
+            if round_num < 6:
+                action = evil_ai(board, hand_cards, 'easy', round_num, history)
+                if action:
+                    card = next(c for c in hand_cards if c['index'] == action['cardIndex'])
+                    card['used'] = True
+                    for a in action['actions']:
+                        place_death_marker(board, a['villainId'], a['targetId'],
+                                           a['shape'], round_num)
+                    history.append({'round': round_num, 'phase': 'action', 'type': 'death',
+                                    'cardIndex': action['cardIndex'],
+                                    'deathMarkers': action['actions']})
+                else:
+                    history.append({'round': round_num, 'phase': 'action',
+                                    'type': 'skip', 'reason': 'no_action'})
             execute_death_markers(board, round_num)
             winner = check_win_condition(board, round_num, Phase.REVEAL)
             expire_surveillance(board)
@@ -134,8 +139,9 @@ def sanity_check():
     return wins == 20
 
 
-def run_matrix(games_per_cell):
-    print(f"\n三档对战矩阵（每格 {games_per_cell} 局，行=正派难度，列=反派难度）\n")
+def run_matrix(games_per_cell, revive403=False):
+    label = "（403 复活变体）" if revive403 else ""
+    print(f"\n三档对战矩阵{label}（每格 {games_per_cell} 局，行=正派难度，列=反派难度）\n")
 
     # 胜率矩阵
     print("【正派胜率】")
@@ -149,7 +155,7 @@ def run_matrix(games_per_cell):
             total_hits = 0
             total_watches = 0
             for _ in range(games_per_cell):
-                w, t, h, wc = play_game(good_diff, evil_diff)
+                w, t, h, wc = play_game(good_diff, evil_diff, revive403)
                 total_t += t
                 total_hits += h
                 total_watches += wc
@@ -184,5 +190,8 @@ def run_matrix(games_per_cell):
 
 if __name__ == '__main__':
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 100
+    with_revive = '--revive' in sys.argv
     sanity_check()
     run_matrix(n)
+    if with_revive:
+        run_matrix(n, revive403=True)

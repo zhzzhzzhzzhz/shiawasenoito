@@ -22,7 +22,7 @@ def full_search(card, villains, board, round_num, heatmap, score_fn):
     """
     m = min(len(card['actions']), len(villains))
     targets = [c for c in board
-               if c['status'] == 'alive' and c['id'] != 403
+               if c['status'] == 'alive'
                and not c.get('hasDeathMarker') and c['role'] == 'good']
     if m == 0 or not targets:
         return {'score': float('-inf'), 'actions': []}

@@ -8,6 +8,7 @@ import sys
 import traceback
 from services.game_session import GameSession
 from services.game_engine import Phase
+from ai.evil_ai import find_full_assignment
 
 
 def run_auto(session, max_steps=200):
@@ -74,28 +75,29 @@ def test_human_evil():
             if session.status == 'finished':
                 break
             continue
-        card = available_cards[0]
-        active_board = session.get_state('evil')['board']
-        villain = next((c for c in active_board
-                        if c['role'] == 'evil' and c['status'] == 'alive' and
-                        not c.get('hasDeathMarker') and
-                        not (c['hasSurveillance'] and c['surveillanceActive'])), None)
-        if not villain:
-            # 反派被监视/标记，无法行动 → 跳过行动进入公示结算
+        # 找任一满员合法方案（规则：范围内标记 + 满员行动 + 禁标同伙）
+        active_villains = [c for c in session.board
+                           if c['role'] == 'evil' and c['status'] == 'alive' and
+                           not c.get('hasDeathMarker') and
+                           not (c['hasSurveillance'] and c['surveillanceActive'])]
+        placed = None
+        for card in available_cards:
+            actions = find_full_assignment(card, active_villains, session.board)
+            if actions:
+                placed = (card, actions)
+                break
+        if not placed:
+            # 无满员合法方案 → 跳过行动进入公示结算
             session.history_rounds.append({
                 'round': session.round, 'phase': 'action', 'type': 'skip',
-                'reason': 'no_active_villain',
+                'reason': 'no_legal_action',
             })
             session.phase = Phase.REVEAL
             steps = run_auto(session)
             if session.status == 'finished':
                 break
             continue
-        actions = [{'villainId': villain['id'],
-                     'targetId': next(c['id'] for c in session.board
-                                      if c['status'] == 'alive' and c['id'] != 403
-                                      and not c.get('hasDeathMarker')),
-                     'shape': card['actions'][0]['shape']}]
+        card, actions = placed
         r = session.play_action_card(1, card['index'], actions)
         assert r['success'], f'出牌失败: {r}'
         round_played += 1
@@ -141,8 +143,32 @@ def test_human_good():
         print('  OK: 正派/反派阶段切换完整走通')
 
 
+def test_revive403():
+    print('=== 场景4: 403 复活变体（正派困难档）===')
+    session = GameSession('t4', {'mode': 'single', 'aiDifficulty': 'normal',
+                                 'goodPlayerId': None, 'evilPlayerId': None,
+                                 'revive403': True})
+    # 403 复活：状态应为 alive（不再是 default_dead）
+    char403 = next(c for c in session.board if c['id'] == 403)
+    assert char403['status'] == 'alive', f'403 应复活: {char403}'
+    assert session.revive403 is True
+    # 反派池为 25 人候选（403 可能被抽中，多局验证：跑 30 局统计 403 出现率 > 0）
+    seen = 0
+    for _ in range(30):
+        s2 = GameSession('t4x', {'mode': 'single', 'aiDifficulty': 'normal',
+                                 'revive403': True})
+        if 403 in s2.villains:
+            seen += 1
+    assert seen > 0, f'30 局中 403 应至少一次被抽为反派: seen={seen}'
+    print(f'  OK: 403 复活（status=alive），30 局中 {seen} 局 403 入反派池')
+    # 全自动对局应正常完赛
+    steps = run_auto(session)
+    assert session.status == 'finished', f'复活模式对局未结束: {session.status}'
+    print(f'  OK: 复活模式全自动对局正常完赛（{session.round} 回合，胜者={session.winner}）')
+
+
 if __name__ == '__main__':
-    tests = [test_all_ai, test_human_evil, test_human_good]
+    tests = [test_all_ai, test_human_evil, test_human_good, test_revive403]
     failed = 0
     for t in tests:
         try:
