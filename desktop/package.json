@@ -15,13 +15,18 @@
     "appId": "com.happythreads.game",
     "productName": "幸せの糸",
     "directories": {
-      "output": "release9"
+      "output": "release10"
     },
     "files": [
       "main.js",
       "preload.js",
-      "config.json",
       "dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "config.json",
+        "to": "config.json"
+      }
     ],
     "win": {
       "target": "nsis",

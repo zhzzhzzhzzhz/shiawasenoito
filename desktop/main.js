@@ -3,14 +3,23 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// 读取后端地址配置（desktop/config.json）
+// 读取后端地址配置：
+// 1) 安装版：resources/config.json（asar 外，用户可直接编辑）
+// 2) 开发模式：项目目录下的 config.json
 function loadBackendUrl() {
-  try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
-    return (cfg.backendUrl || '').replace(/\/+$/, '');
-  } catch (e) {
-    return '';
+  const candidates = [
+    path.join(process.resourcesPath || '', 'config.json'),
+    path.join(__dirname, 'config.json'),
+  ];
+  for (const p of candidates) {
+    try {
+      const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
+      if (cfg && cfg.backendUrl) return String(cfg.backendUrl).replace(/\/+$/, '');
+    } catch (e) {
+      // 尝试下一个候选
+    }
   }
+  return '';
 }
 
 const BACKEND_URL = loadBackendUrl();
