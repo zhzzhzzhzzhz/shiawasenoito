@@ -1,6 +1,12 @@
 import { io, Socket } from 'socket.io-client';
 import { useGameStore } from '../store/gameStore';
+import { clearActiveGame } from '../store/gameStore';
 import { SOCKET_URL } from '../config/env';
+
+// 调试日志仅在开发模式输出（生产环境避免控制台泄露内部消息结构）
+const log = (...args: unknown[]) => {
+  if (import.meta.env.DEV) log(...args);
+};
 
 let socket: Socket | null = null;
 
@@ -13,14 +19,24 @@ export function connectSocket(token: string): Socket {
   });
 
   socket.on('connect', () => {
-    console.log('[Socket] Connected:', socket?.id);
+    log('[Socket] Connected:', socket?.id);
     useGameStore.getState().setConnected(true);
     useGameStore.getState().setSocket(socket);
   });
 
   socket.on('disconnect', () => {
-    console.log('[Socket] Disconnected');
+    log('[Socket] Disconnected');
     useGameStore.getState().setConnected(false);
+  });
+
+  // 连接失败兜底：不抛未捕获异常，通知用户并允许重试
+  socket.on('connect_error', (err) => {
+    if (import.meta.env.DEV) console.warn('[Socket] connect_error:', err?.message);
+    useGameStore.getState().setConnected(false);
+    useGameStore.getState().setNotification({
+      type: 'error',
+      message: '服务器连接失败，请检查网络后重试',
+    });
   });
 
   socket.on('game:state', (data) => {
@@ -89,6 +105,7 @@ export function connectSocket(token: string): Socket {
 
   socket.on('game:result', (data) => {
     const store = useGameStore.getState();
+    clearActiveGame(); // 对局结束，清除刷新恢复记录
     store.setGameState({
       winner: data.winner,
       gameStatus: 'finished',
@@ -105,7 +122,7 @@ export function connectSocket(token: string): Socket {
   });
 
   socket.on('game:started', (data) => {
-    console.log('[Socket] Game started');
+    log('[Socket] Game started');
     const store = useGameStore.getState();
     store.setGameState({
       phase: data?.phase || 'action',
@@ -116,14 +133,14 @@ export function connectSocket(token: string): Socket {
   });
 
   socket.on('game:match_found', (data) => {
-    console.log('[Socket] Match found:', data);
+    log('[Socket] Match found:', data);
     const store = useGameStore.getState();
     store.setRoom(data.roomId, 'match', data.role);
     store.setNotification({ type: 'success', message: '匹配成功！游戏开始' });
   });
 
   socket.on('game:invite_created', (data) => {
-    console.log('[Socket] Invite created:', data);
+    log('[Socket] Invite created:', data);
     const store = useGameStore.getState();
     store.setRoom(data.roomId, 'invite', data.myRole);
     // 将邀请码存到 store 供页面展示
@@ -131,13 +148,13 @@ export function connectSocket(token: string): Socket {
   });
 
   socket.on('game:joined', (data) => {
-    console.log('[Socket] Joined:', data);
+    log('[Socket] Joined:', data);
     const store = useGameStore.getState();
     store.setRoom(data.roomId, 'invite', data.myRole);
   });
 
   socket.on('game:room_update', (data) => {
-    console.log('[Socket] Room update:', data);
+    log('[Socket] Room update:', data);
     useGameStore.getState().setRoomInfo(data);
   });
 
@@ -157,6 +174,7 @@ export function connectSocket(token: string): Socket {
 
   socket.on('game:abandoned', (data) => {
     const store = useGameStore.getState();
+    clearActiveGame(); // 被判弃赛，清除刷新恢复记录
     store.setGameState({ abandoned: true, opponentDisconnected: false, disconnectDeadline: null });
     store.setNotification({
       type: 'error',

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useGameStore } from '../store/gameStore';
+import { useGameStore, restoreActiveGame } from '../store/gameStore';
 import FullscreenButton from '../components/FullscreenButton';
 import UserAvatar from '../components/UserAvatar';
 import AccountSidebar from '../components/AccountSidebar';
@@ -27,6 +27,8 @@ export default function MainMenu() {
   const user = useGameStore((s) => s.user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bgReady, setBgReady] = useState(true); // 背景视频是否可用（缺失时回退光晕背景）
+  // 刷新/误退后有进行中的对局 → 显示恢复入口
+  const [activeGame] = useState(() => restoreActiveGame());
 
   return (
     <div className="relative h-screen w-screen flex items-center justify-center bg-[#0a0a1a] overflow-hidden"><FullscreenButton />
@@ -72,6 +74,21 @@ export default function MainMenu() {
         >
           シアワセノイト
         </motion.h1>
+
+        {/* 恢复对局入口：刷新/误退后存在进行中的对局 */}
+        {activeGame && (
+          <motion.div
+            className="mb-4"
+            variants={itemVariants}
+          >
+            <button
+              onClick={() => navigate(activeGame.mode === 'single' ? '/single/game' : '/multi/game')}
+              className="w-full py-3 rounded-xl border border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 text-amber-200 text-sm font-medium transition-all"
+            >
+              ⚡ 检测到进行中的对局，点击恢复
+            </button>
+          </motion.div>
+        )}
 
         {/* Mode panels（单机左 / 联机右，极淡玻璃透出背景） */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

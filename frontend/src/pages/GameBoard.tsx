@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGameStore } from '../store/gameStore';
+import { useGameStore, restoreActiveGame } from '../store/gameStore';
 import { connectSocket, getSocket } from '../socket/gameSocket';
 import Board from '../components/Board';
 import CharacterCard from '../components/CharacterCard';
@@ -50,7 +50,18 @@ export default function GameBoardPage() {
 
   // ---- Socket 初始化 ----
   useEffect(() => {
-    if (!roomIdRef.current) { navigate('/'); return; }
+    // 刷新恢复：store 中 roomId 丢失时（页面刷新），从 localStorage 恢复进行中的对局
+    if (!roomIdRef.current) {
+      const saved = restoreActiveGame();
+      if (saved) {
+        store.setRoom(saved.roomId, saved.mode, saved.myRole);
+        roomIdRef.current = saved.roomId;
+        myRoleRef.current = saved.myRole;
+      } else {
+        navigate('/');
+        return;
+      }
+    }
     const t = token || localStorage.getItem('token') || '';
     const socket = connectSocket(t);
     const mode = store.mode;

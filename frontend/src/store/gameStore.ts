@@ -142,11 +142,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     else localStorage.removeItem('token');
     set({ user, token });
   },
-  setRoom: (roomId, mode, myRole) => set({
-    roomId, mode, myRole,
-    // 邀请房先进入等待态，双方准备后由 game:started 置为 playing
-    gameStatus: mode === 'invite' ? 'waiting' : 'playing',
-  }),
+  setRoom: (roomId, mode, myRole) => {
+    // 持久化进行中的对局（刷新页面后恢复用），localStorage 不可用时静默降级
+    try {
+      localStorage.setItem('active_game', JSON.stringify({ roomId, mode, myRole }));
+    } catch { /* ignore */ }
+    set({
+      roomId, mode, myRole,
+      // 邀请房先进入等待态，双方准备后由 game:started 置为 playing
+      gameStatus: mode === 'invite' ? 'waiting' : 'playing',
+    });
+  },
   setInviteCode: (inviteCode) => set({ inviteCode }),
   setRoomInfo: (roomInfo) => set({ roomInfo }),
   setGameState: (partial) => set(partial),
@@ -171,5 +177,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
   clearDeathActions: () => set({ pendingDeathActions: [] }),
   setNotification: (n) => set({ notification: n }),
-  reset: () => set({ ...initialState, socket: get().socket, isConnected: get().isConnected }),
+  reset: () => {
+    clearActiveGame();
+    set({ ...initialState, socket: get().socket, isConnected: get().isConnected });
+  },
 }));
+
+// ==================== 对局持久化（刷新恢复）====================
+
+const ACTIVE_GAME_KEY = 'active_game';
+
+/** 清除进行中对局的持久化记录（结算/弃赛/退出时调用） */
+export function clearActiveGame(): void {
+  try {
+    localStorage.removeItem(ACTIVE_GAME_KEY);
+  } catch { /* ignore */ }
+}
+
+/** 恢复进行中对局的持久化记录（刷新后调用），无记录返回 null */
+export function restoreActiveGame(): { roomId: string; mode: GameMode; myRole: GameRole | null } | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_GAME_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || typeof data.roomId !== 'string' || !data.roomId) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
