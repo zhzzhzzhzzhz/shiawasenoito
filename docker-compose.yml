@@ -75,7 +75,7 @@ services:
 
   # ==================== Nginx 反代（桌面客户端入口）====================
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:alpine
     container_name: happy-threads-nginx
     restart: unless-stopped
     ports:
