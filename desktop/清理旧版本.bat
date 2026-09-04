@@ -1,7 +1,6 @@
 @echo off
-chcp 65001 >nul
 echo ============================================
-echo  æ¸…ç† Electron æ‰“åŒ…äº§ç‰©ï¼ˆrelease / release2ï¼‰
+echo  ÇåÀí Electron ´ò°ü²úÎï£¨release / release2£©
 echo ============================================
 echo.
 
@@ -10,32 +9,32 @@ set CLEANED=1
 if exist "%~dp0release" (
     rmdir /s /q "%~dp0release"
     if exist "%~dp0release" (
-        echo [å¤±è´¥] release ä»æœ‰æ–‡ä»¶è¢«å ç”¨ã€‚
+        echo [Ê§°Ü] release ÈÔÓĞÎÄ¼ş±»Õ¼ÓÃ¡£
         set CLEANED=0
     ) else (
-        echo [æˆåŠŸ] release å·²æ¸…ç†ã€‚
+        echo [³É¹¦] release ÒÑÇåÀí¡£
     )
 ) else (
-    echo release ä¸å­˜åœ¨ï¼Œè·³è¿‡ã€‚
+    echo release ²»´æÔÚ£¬Ìø¹ı¡£
 )
 
 if exist "%~dp0release2" (
     rmdir /s /q "%~dp0release2"
     if exist "%~dp0release2" (
-        echo [å¤±è´¥] release2 ä»æœ‰æ–‡ä»¶è¢«å ç”¨ã€‚
+        echo [Ê§°Ü] release2 ÈÔÓĞÎÄ¼ş±»Õ¼ÓÃ¡£
         set CLEANED=0
     ) else (
-        echo [æˆåŠŸ] release2 å·²æ¸…ç†ã€‚
+        echo [³É¹¦] release2 ÒÑÇåÀí¡£
     )
 ) else (
-    echo release2 ä¸å­˜åœ¨ï¼Œè·³è¿‡ã€‚
+    echo release2 ²»´æÔÚ£¬Ìø¹ı¡£
 )
 
 echo.
 if "%CLEANED%"=="0" (
-    echo æç¤ºï¼šæœ‰æ–‡ä»¶è¢«å ç”¨ï¼Œé‡å¯ç”µè„‘åå†è¿è¡Œæœ¬è„šæœ¬æœ€ç¨³å¦¥ã€‚
+    echo ÌáÊ¾£ºÓĞÎÄ¼ş±»Õ¼ÓÃ£¬ÖØÆôµçÄÔºóÔÙÔËĞĞ±¾½Å±¾×îÎÈÍ×¡£
 ) else (
-    echo å…¨éƒ¨æ¸…ç†å®Œæˆï¼
+    echo È«²¿ÇåÀíÍê³É£¡
 )
 
 echo.
