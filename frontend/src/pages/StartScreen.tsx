@@ -22,10 +22,10 @@ const floatingLines = Array.from({ length: 3 }, (_, i) => ({
 }));
 
 // 开屏视频路径（后续补充视频后替换，无需改代码）
-const SPLASH_MAIN = '/placeholder-videos/splash_main.mp4';       // 开屏主视频（80%）
-const SPLASH_EXTRA_1 = '/placeholder-videos/splash_extra_1.mp4'; // 开屏穿插视频 1（10%）
-const SPLASH_EXTRA_2 = '/placeholder-videos/splash_extra_2.mp4'; // 开屏穿插视频 2（10%）
-const INTRO_VIDEO = '/placeholder-videos/intro.mp4'; // 点击后播放一次，播完进入模式选择
+const SPLASH_MAIN = import.meta.env.BASE_URL + 'placeholder-videos/splash_main.mp4';       // 开屏主视频（80%）
+const SPLASH_EXTRA_1 = import.meta.env.BASE_URL + 'placeholder-videos/splash_extra_1.mp4'; // 开屏穿插视频 1（10%）
+const SPLASH_EXTRA_2 = import.meta.env.BASE_URL + 'placeholder-videos/splash_extra_2.mp4'; // 开屏穿插视频 2（10%）
+const INTRO_VIDEO = import.meta.env.BASE_URL + 'placeholder-videos/intro.mp4'; // 点击后播放一次，播完进入模式选择
 
 // 视频缺失时的兜底等待时间（秒）
 const FALLBACK_WAIT = 3;

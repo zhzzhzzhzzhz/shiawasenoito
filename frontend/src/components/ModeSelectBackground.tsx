@@ -6,7 +6,7 @@ import { useState } from 'react';
  * 视频缺失时静默回退（不渲染视频，仅保留羽化遮罩）。
  */
 
-const MENU_BG_VIDEO = '/placeholder-videos/menu_bg.mp4';
+const MENU_BG_VIDEO = import.meta.env.BASE_URL + 'placeholder-videos/menu_bg.mp4';
 
 export default function ModeSelectBackground() {
   const [ready, setReady] = useState(true);

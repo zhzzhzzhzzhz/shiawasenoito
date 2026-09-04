@@ -20,7 +20,7 @@ const itemVariants = {
 };
 
 // 模式选择界面动态背景视频（后续补充视频后替换，无需改代码）
-const MENU_BG_VIDEO = '/placeholder-videos/menu_bg.mp4';
+const MENU_BG_VIDEO = import.meta.env.BASE_URL + 'placeholder-videos/menu_bg.mp4';
 
 export default function MainMenu() {
   const navigate = useNavigate();

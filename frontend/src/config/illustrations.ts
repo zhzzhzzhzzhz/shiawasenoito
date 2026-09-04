@@ -11,8 +11,10 @@
  *   dead.webp               → 死亡角色插画
  */
 
-const BASE = '/placeholder-illust';
-const BASE_V2 = '/placeholder-illust-v2';
+// BASE_URL 随 vite.config.ts 的 base 配置变化：Web 部署为 '/'，Electron（base: './'）为 './'，
+// 保证 file:// 协议下相对 index.html 正确解析
+const BASE = import.meta.env.BASE_URL + 'placeholder-illust';
+const BASE_V2 = import.meta.env.BASE_URL + 'placeholder-illust-v2';
 
 /** 人物卡图片路径（id: 角色编号 201~605；version: v1 原版 / v2 第二版） */
 export function charIllustration(id: number, version: 'v1' | 'v2' = 'v1'): string {
