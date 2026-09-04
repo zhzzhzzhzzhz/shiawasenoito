@@ -1,0 +1,90 @@
+# 《幸福的丝线》智能体版全栈 Docker 编排
+# 组成：MySQL 8 + 后端（FastAPI+Socket.IO+智能体） + 前端（Nginx 托管 + 反代）
+#
+# 使用方法：
+#   1. git clone 仓库到服务器（含 backend-python/ 与 frontend/）
+#   2. 在本文件同级创建 .env（见下方示例，密钥务必修改）
+#   3. docker compose up -d --build
+#   4. 访问 http://服务器IP 即可开始游戏
+#
+# 常用命令：
+#   查看状态: docker compose ps
+#   查看日志: docker compose logs -f backend
+#   停止:     docker compose down
+#   完全清理(会清库): docker compose down -v
+#
+# .env 示例：
+#   MYSQL_ROOT_PASSWORD=你的强密码
+#   JWT_SECRET=足够长的随机串
+#   AGENT_LLM_BASE_URL=https://api.deepseek.com/v1
+#   AGENT_LLM_API_KEY=sk-你的key
+#   AGENT_LLM_MODEL=deepseek-chat
+
+services:
+  # ==================== MySQL 数据库 ====================
+  mysql:
+    image: mysql:8.0
+    container_name: happy-threads-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中设置 MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: happy_threads
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # ==================== Python 后端（智能体版）====================
+  backend:
+    build:
+      context: ./backend-python
+    container_name: happy-threads-backend
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: happy_threads
+      JWT_SECRET: ${JWT_SECRET:?请在 .env 中设置 JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGIN: "*"
+      # ===== LLM 智能体（可选：不配则自动回退规则 AI，对局永不卡死）=====
+      AGENT_LLM_BASE_URL: ${AGENT_LLM_BASE_URL:-}
+      AGENT_LLM_API_KEY: ${AGENT_LLM_API_KEY:-}
+      AGENT_LLM_MODEL: ${AGENT_LLM_MODEL:-deepseek-chat}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:3000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ==================== 前端（构建 + Nginx 托管 + 反代）====================
+  frontend:
+    build:
+      context: ./frontend
+    container_name: happy-threads-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # HTTPS 时放开 443 并挂载证书
+      # - "443:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
