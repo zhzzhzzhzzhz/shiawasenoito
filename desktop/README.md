@@ -24,6 +24,8 @@
 ## 使用步骤
 
 1. 配置后端地址：编辑 `config.json` 的 `backendUrl`。
+   - **开发模式**：项目目录下的 `config.json`
+   - **安装版**：安装目录的 `resources/config.json`（如 `C:\Users\TX\AppData\Local\Programs\happy-threads-desktop\resources\config.json`，改完重启应用生效）
    - 本机后端：`http://127.0.0.1:3000`
    - 蒲公英联机：填你本机的**蒲公英虚拟 IP**，如 `http://10.168.x.x:3000`
    - 云服务器：填服务器 IP / 域名（生产建议 `https://你的域名`）
