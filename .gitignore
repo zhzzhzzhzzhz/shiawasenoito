@@ -47,6 +47,7 @@ desktop/release/
 desktop/release2/
 desktop/release3/
 desktop/release4/
+desktop/release5/
 desktop/dist/
 
 # ===== 嵌套 git 仓库（独立项目，不入库）=====

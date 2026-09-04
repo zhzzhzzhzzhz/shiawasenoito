@@ -79,7 +79,7 @@ services:
     container_name: happy-threads-nginx
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "25891:80"
       # HTTPS 时放开 443 并挂载证书
       # - "443:443"
     volumes:
