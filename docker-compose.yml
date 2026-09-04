@@ -1,11 +1,12 @@
-# 《幸福的丝线》智能体版全栈 Docker 编排
-# 组成：MySQL 8 + 后端（FastAPI+Socket.IO+智能体） + 前端（Nginx 托管 + 反代）
+# 《幸福的丝线》后端 Docker 编排（智能体版）
+# 组成：MySQL 8 + 后端（FastAPI+Socket.IO+智能体） + Nginx 反代（桌面客户端入口）
+# 前端不再部署 Web 版，由 Electron 桌面客户端连接本服务器
 #
 # 使用方法：
-#   1. git clone 仓库到服务器（含 backend-python/ 与 frontend/）
+#   1. git clone 仓库到服务器（含 backend-python/ 与 deploy/）
 #   2. 在本文件同级创建 .env（见下方示例，密钥务必修改）
 #   3. docker compose up -d --build
-#   4. 访问 http://服务器IP 即可开始游戏
+#   4. 桌面客户端 config.json 的 backendUrl 填 http://服务器IP
 #
 # 常用命令：
 #   查看状态: docker compose ps
@@ -72,16 +73,17 @@ services:
       retries: 10
       start_period: 20s
 
-  # ==================== 前端（构建 + Nginx 托管 + 反代）====================
-  frontend:
-    build:
-      context: ./frontend
-    container_name: happy-threads-frontend
+  # ==================== Nginx 反代（桌面客户端入口）====================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: happy-threads-nginx
     restart: unless-stopped
     ports:
       - "80:80"
       # HTTPS 时放开 443 并挂载证书
       # - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       backend:
         condition: service_healthy
