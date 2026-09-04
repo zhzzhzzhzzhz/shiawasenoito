@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useAutoLogin } from './hooks/useAuth';
 import { listBackgrounds } from './api/user';
@@ -44,7 +44,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ErrorBoundary>
         <AnimatePresence mode="wait">
           <Routes>
@@ -59,7 +59,7 @@ function App() {
           </Routes>
         </AnimatePresence>
       </ErrorBoundary>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
