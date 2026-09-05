@@ -11,8 +11,8 @@ from services.game_engine import (
     get_active_villains, get_public_board, place_death_marker, find_char,
     get_affected_char_ids,
 )
-from ai.evil_ai import evil_ai
-from ai.good_ai import good_ai
+from agents.brain import DecisionContext, build_brain
+from ai.evil_ai import find_full_assignment
 
 
 class GameSession:
@@ -22,13 +22,18 @@ class GameSession:
         self.room_id = room_id
         self.mode = options.get('mode', 'single')
         self.ai_difficulty = options.get('aiDifficulty', 'normal')
+        # 大脑后端：'rule' | 'agent' | 'hybrid'（默认 rule，行为与升级前一致）
+        self.ai_backend = options.get('aiBackend', 'rule')
+        self.brain = build_brain(self.ai_backend, options)
+        # 403 复活变体（正派困难档）：403 可被标记、可入反派池（25 人候选）
+        self.revive403 = bool(options.get('revive403', False))
         self.good_player_id = options.get('goodPlayerId')
         self.evil_player_id = options.get('evilPlayerId')
         self.good_player_account = options.get('goodPlayerAccount')
         self.evil_player_account = options.get('evilPlayerAccount')
 
-        self.villains = draw_villains()
-        self.board = create_initial_board(self.villains)
+        self.villains = draw_villains(self.revive403)
+        self.board = create_initial_board(self.villains, self.revive403)
         self.hand_cards = get_action_card_pool()
         self.round = 1
         self.phase = get_initial_phase(1)
@@ -49,6 +54,10 @@ class GameSession:
         self.disconnect_player_id = None   # 当前断线等待重连的玩家 id
         self.disconnect_deadline = None    # 重连截止时间戳（epoch 秒）
 
+        # 训练数据采集：决策步骤记录（状态 → 动作），对局结束时由 recorder 落盘
+        self.training_steps = []
+        self.recorded = False
+
     def get_state(self, viewer_role: str = None) -> dict:
         return {
             'roomId': self.room_id,
@@ -64,8 +73,9 @@ class GameSession:
             'goodPlayerId': self.good_player_id,
             'evilPlayerId': self.evil_player_id,
             'aiDifficulty': self.ai_difficulty,
-            'reveal': self.reveal_data if self.phase == Phase.REVEAL else None,
-            'roundRecords': self.get_round_records(),
+            'revive403': self.revive403,
+            'reveal': self._sanitize_reveal(viewer_role),
+            'roundRecords': self.get_round_records(viewer_role),
             # 回合倒计时（双人模式，前端据此显示剩余时间）
             'turnEndAt': int(self.turn_deadline * 1000) if self.turn_deadline else None,
             'turnPlayer': self.turn_player,
@@ -74,6 +84,24 @@ class GameSession:
             # 断线重连倒计时（双人模式弃赛判定）
             'disconnectDeadline': int(self.disconnect_deadline * 1000) if self.disconnect_deadline else None,
             'disconnectPlayerId': self.disconnect_player_id,
+        }
+
+    def _sanitize_reveal(self, viewer_role: str):
+        """公示数据按视角过滤（信息边界，2026-09-02 修复）：
+
+        死亡标记的 villainId（行动者身份）仅对反派可见——正派玩家必须通过
+        范围约束与行动次数自行推断行动者，前端本就不展示该字段，但接口层
+        此前会随状态下发造成信息泄漏。
+        """
+        reveal = self.reveal_data if self.phase == Phase.REVEAL else None
+        if not reveal or viewer_role == 'evil':
+            return reveal
+        return {
+            **reveal,
+            'deathMarkers': [
+                {k: v for k, v in m.items() if k != 'villainId'}
+                for m in reveal['deathMarkers']
+            ],
         }
 
     def get_room_info(self) -> dict:
@@ -97,8 +125,12 @@ class GameSession:
             ],
         }
 
-    def get_round_records(self) -> list:
-        """汇总历史记录为每回合展示结构（供前端左侧滚动记录框）"""
+    def get_round_records(self, viewer_role: str = None) -> list:
+        """汇总历史记录为每回合展示结构（供前端左侧滚动记录框）。
+
+        viewer_role 非 'evil' 时剥离 deathMarkers 中的 villainId（信息边界，
+        2026-09-02 修复），正派只能看到目标与形状。
+        """
         records = []
         for h in self.history_rounds:
             r = h.get('round')
@@ -111,10 +143,14 @@ class GameSession:
             if h.get('phase') == 'placement':
                 entry['surveillance'] = h.get('targets', [])
             elif ptype == 'death':
+                markers = h.get('deathMarkers', [])
+                if viewer_role != 'evil':
+                    markers = [{k: v for k, v in m.items() if k != 'villainId'}
+                               for m in markers]
                 entry['death'] = {
                     'cardIndex': h.get('cardIndex'),
                     'cardDescription': self._card_desc(h.get('cardIndex')),
-                    'deathMarkers': h.get('deathMarkers', []),
+                    'deathMarkers': markers,
                 }
             elif h.get('phase') == 'reveal':
                 entry['result'] = {
@@ -137,6 +173,10 @@ class GameSession:
         if not isinstance(targets, list) or len(targets) != 3:
             return {'success': False, 'error': '必须选择3个监视目标'}
 
+        # 决策前快照（训练数据：正派监视的状态 → 动作）
+        board_before = copy.deepcopy(self.board)
+        history_before = copy.deepcopy(self.history_rounds)
+
         results = place_surveillance(self.board, targets, self.round)
         failed = [r for r in results if not r['success']]
         if failed:
@@ -146,6 +186,14 @@ class GameSession:
         self.history_rounds.append({
             'round': self.round, 'phase': 'placement',
             'type': 'surveillance', 'targets': targets,
+        })
+
+        # 记录正派监视决策（状态 → 动作）
+        self.training_steps.append({
+            'type': 'good_watch',
+            'round': self.round,
+            'state': {'board': board_before, 'history': history_before},
+            'action': {'targets': targets},
         })
 
         # 若所有反派均被监视/死亡 → 正派立即获胜，防止反派无法行动导致卡死
@@ -173,8 +221,10 @@ class GameSession:
         active_villains = get_active_villains(self.board)
         max_actions = min(len(card['actions']), len(active_villains))
 
-        if not death_actions or len(death_actions) > max_actions:
-            return {'success': False, 'error': f'最多只能放置{max_actions}个死亡标记'}
+        # 满员行动规则（硬约束，2026-09-02 定）：能动时必须满动，
+        # 必须恰好放置 max_actions 个死亡标记（正派 P3 计数推理的信息发动机）。
+        if not death_actions or len(death_actions) != max_actions:
+            return {'success': False, 'error': f'必须恰好放置{max_actions}个死亡标记（满员行动规则）'}
 
         # 形状数量校验：混合卡（十字+九宫格）不固定顺序，但每种形状总数不能超过卡牌规定
         card_shape_counts = Counter(a['shape'] for a in card['actions'])
@@ -182,6 +232,11 @@ class GameSession:
         for shape, count in action_shape_counts.items():
             if count > card_shape_counts.get(shape, 0):
                 return {'success': False, 'error': '死亡标记形状与行动卡不符'}
+
+        # 决策前快照（训练数据：反派行动的状态 → 动作）
+        board_before = copy.deepcopy(self.board)
+        hand_before = copy.deepcopy(self.hand_cards)
+        history_before = copy.deepcopy(self.history_rounds)
 
         for action in death_actions:
             result = place_death_marker(
@@ -196,6 +251,15 @@ class GameSession:
             'round': self.round, 'phase': 'action', 'type': 'death',
             'cardIndex': card_index, 'deathMarkers': death_actions,
             'boardSnapshot': copy.deepcopy(self.board),
+        })
+
+        # 记录反派行动决策（状态 → 动作）
+        self.training_steps.append({
+            'type': 'evil_action',
+            'round': self.round,
+            'state': {'board': board_before, 'handCards': hand_before,
+                      'history': history_before},
+            'action': {'cardIndex': card_index, 'actions': death_actions},
         })
         # 保存公示数据：行动卡 + 死亡标记对象（供正派推理附加监视）
         self.reveal_data = {
@@ -256,14 +320,15 @@ class GameSession:
         }
 
     def ai_good_place(self) -> dict:
-        targets = good_ai(self.board, self.ai_difficulty, self.history_rounds)
+        ctx = DecisionContext.from_session(self, 'good')
+        targets = self.brain.good_decision(ctx)
         result = self.place_surveillance_action(None, targets)
         result['aiTargets'] = targets
         return result
 
     def ai_evil_action(self) -> dict:
-        action = evil_ai(self.board, self.hand_cards, self.ai_difficulty, self.round,
-                         self.history_rounds)
+        ctx = DecisionContext.from_session(self, 'evil')
+        action = self.brain.evil_decision(ctx)
         if not action:
             # 无可用行动卡或无可行动反派（被监视/死亡）→ 跳过行动，直接进入公示结算，防止流程卡死
             self.history_rounds.append({
@@ -297,11 +362,12 @@ class GameSession:
 
         available_cards = [c for c in self.hand_cards if not c['used']]
         active_villains = get_active_villains(self.board)
-        has_markable_target = any(
-            c['status'] == 'alive' and c['id'] != 403 and not c.get('hasDeathMarker')
-            for c in self.board
+        # 满员行动规则下，"可执行行动" = 存在至少一张卡的满员合法方案
+        feasible = any(
+            find_full_assignment(card, active_villains, self.board)
+            for card in available_cards
         )
-        if available_cards and active_villains and has_markable_target:
+        if feasible:
             return {'success': False, 'error': '仍有可执行行动，不能跳过'}
 
         self.history_rounds.append({
@@ -351,4 +417,18 @@ class GameSession:
                            for c in self.board],
             'winner': self.winner,
             'totalRounds': self.round,
+        }
+
+    def get_training_record(self) -> dict:
+        """汇总训练数据集记录（完整对局 + 状态→动作决策步骤）"""
+        return {
+            'roomId': self.room_id,
+            'mode': self.mode,
+            'villains': self.villains,
+            'winner': self.winner,
+            'totalRounds': self.round,
+            'goodPlayerId': self.good_player_id,
+            'evilPlayerId': self.evil_player_id,
+            'aiDifficulty': self.ai_difficulty,
+            'steps': self.training_steps,
         }

@@ -19,16 +19,20 @@ def pos_to_char_id(row: int, col: int) -> int:
     return (row + 2) * 100 + (col + 1)
 
 
-def create_initial_board(villains: list = None) -> list:
-    """生成完整的25个角色初始状态（顶行到底行：601~605 → 201~205）"""
+def create_initial_board(villains: list = None, revive403: bool = False) -> list:
+    """生成完整的25个角色初始状态（顶行到底行：601~605 → 201~205）。
+
+    revive403=True 时 403"复活"：正常存活、可被标记、可入反派池（正派困难档变体）。
+    """
     if villains is None:
         villains = []
     board = []
     for row in range(4, -1, -1):  # 4→0，使顶行(601~605)在数组最前
         for col in range(5):
             cid = pos_to_char_id(row, col)
-            status = 'default_dead' if cid == 403 else 'alive'
-            role = 'evil' if cid in villains else ('unknown' if cid == 403 else 'good')
+            is_default_dead = (cid == 403 and not revive403)
+            status = 'default_dead' if is_default_dead else 'alive'
+            role = 'evil' if cid in villains else ('unknown' if is_default_dead else 'good')
 
             board.append({
                 'id': cid,
@@ -133,6 +137,16 @@ def place_death_marker(board: list, villain_id: int, target_id: int,
         return {'success': False, 'reason': '目标不可用'}
     if target.get('hasDeathMarker'):
         return {'success': False, 'reason': '目标已被标记'}
+    # 禁止标记反派同伙（规则硬约束，2026-09-02 补）：自残标记破坏
+    # "被杀者不可能是反派"公理，且会推进正派胜利条件。
+    if target['role'] == 'evil':
+        return {'success': False, 'reason': '不能标记反派同伙'}
+
+    # 范围校验（规则硬约束，2026-09-01 补）：反派必须站在死亡标记的影响范围内，
+    # 与前端"只能放在范围内"（GameBoard.tsx）一致；且不能标记自身。
+    affected_ids = get_affected_char_ids(target['row'], target['col'], shape)
+    if villain_id not in affected_ids or villain_id == target_id:
+        return {'success': False, 'reason': '反派不在标记影响范围内'}
 
     target['hasDeathMarker'] = True
     target['deathMarkerShape'] = shape
@@ -225,12 +239,13 @@ def check_win_condition(board: list, round_num: int, phase: str):
 # ==================== 随机反派 ====================
 
 
-def draw_villains() -> list:
+def draw_villains(revive403: bool = False) -> list:
+    """随机抽取 3 名反派。revive403=True 时 403 进入候选池（25 人）。"""
     candidates = []
     for row in range(5):
         for col in range(5):
             cid = pos_to_char_id(row, col)
-            if cid != 403:
+            if cid != 403 or revive403:
                 candidates.append(cid)
     random.shuffle(candidates)
     return sorted(candidates[:3])
@@ -248,8 +263,9 @@ def get_active_villains(board: list) -> list:
 
 
 def get_surveillance_candidates(board: list) -> list:
+    """可监视候选：存活且未被死亡标记的角色（403 复活变体下自然包含 403）。"""
     return [c for c in board
-            if c['status'] == 'alive' and c['id'] != 403 and not c.get('hasDeathMarker')]
+            if c['status'] == 'alive' and not c.get('hasDeathMarker')]
 
 
 def get_public_board(board: list, viewer_role: str = None) -> list:

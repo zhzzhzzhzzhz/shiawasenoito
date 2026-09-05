@@ -17,6 +17,13 @@ UPLOAD_DIR = os.path.join(
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB
 
+# 房间背景图片目录（前端 public/placeholder-illust/background）
+BACKGROUND_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    '..', 'frontend', 'public', 'placeholder-illust', 'background'
+)
+BACKGROUND_EXT = ('.png', '.jpg', '.jpeg', '.webp')
+
 
 def _user_dict(row: dict) -> dict:
     """把数据库行转成 API 用户对象（snake_case → camelCase）"""
@@ -28,6 +35,7 @@ def _user_dict(row: dict) -> dict:
         'avatarValue': row.get('avatar_value'),
         'playIntro': bool(row.get('play_intro', 1)),
         'illustVersion': row.get('illust_version') or 'v1',
+        'backgroundPref': row.get('background_pref') or 'random',
     }
 
 
@@ -48,6 +56,7 @@ class UpdateProfileBody(BaseModel):
     avatarValue: str | None = None
     playIntro: bool | None = None
     illustVersion: str | None = None
+    backgroundPref: str | None = None
 
 
 class ChangePasswordBody(BaseModel):
@@ -80,7 +89,7 @@ async def register(body: RegisterBody):
             'user': {
                 'id': user_id, 'account': body.account, 'nickname': body.nickname,
                 'avatarType': None, 'avatarValue': None,
-                'playIntro': True, 'illustVersion': 'v1',
+                'playIntro': True, 'illustVersion': 'v1', 'backgroundPref': 'random',
             },
         },
     }
@@ -92,7 +101,7 @@ async def login(body: LoginBody):
         return {'code': 4001, 'message': '账号和密码不能为空', 'data': None}
 
     users = query(
-        'SELECT id, account, password, nickname, avatar_type, avatar_value, play_intro, illust_version '
+        'SELECT id, account, password, nickname, avatar_type, avatar_value, play_intro, illust_version, background_pref '
         'FROM users WHERE account = %s',
         (body.account,)
     )
@@ -116,7 +125,7 @@ async def login(body: LoginBody):
 @router.get('/profile')
 async def profile(user: dict = Depends(get_current_user)):
     users = query(
-        'SELECT id, account, nickname, avatar_type, avatar_value, play_intro, illust_version, created_at '
+        'SELECT id, account, nickname, avatar_type, avatar_value, play_intro, illust_version, background_pref, created_at '
         'FROM users WHERE id = %s',
         (user['id'],)
     )
@@ -156,6 +165,13 @@ async def update_profile(body: UpdateProfileBody, user: dict = Depends(get_curre
         sets.append('illust_version=%s')
         params.append(body.illustVersion)
 
+    if body.backgroundPref is not None:
+        bg = body.backgroundPref.strip()
+        if bg != 'random' and not re.match(r'^[\w.-]+\.(png|jpg|jpeg|webp)$', bg):
+            return {'code': 4004, 'message': '背景参数无效', 'data': None}
+        sets.append('background_pref=%s')
+        params.append(bg)
+
     if not sets:
         return {'code': 0, 'message': '无更新', 'data': None}
 
@@ -163,7 +179,7 @@ async def update_profile(body: UpdateProfileBody, user: dict = Depends(get_curre
     execute(f"UPDATE users SET {', '.join(sets)} WHERE id=%s", tuple(params))
 
     users = query(
-        'SELECT id, account, nickname, avatar_type, avatar_value, play_intro, illust_version '
+        'SELECT id, account, nickname, avatar_type, avatar_value, play_intro, illust_version, background_pref '
         'FROM users WHERE id = %s',
         (user['id'],)
     )
@@ -232,3 +248,14 @@ async def get_avatar(filename: str):
     }.get(ext, 'application/octet-stream')
     with open(path, 'rb') as f:
         return Response(content=f.read(), media_type=mime)
+
+
+@router.get('/backgrounds')
+async def list_backgrounds():
+    """返回房间背景图片文件名列表（扫描 public/placeholder-illust/background 目录，公开接口）"""
+    try:
+        files = os.listdir(BACKGROUND_DIR)
+    except FileNotFoundError:
+        return {'code': 0, 'message': 'ok', 'data': []}
+    imgs = sorted(f for f in files if f.lower().endswith(BACKGROUND_EXT))
+    return {'code': 0, 'message': 'ok', 'data': imgs}
