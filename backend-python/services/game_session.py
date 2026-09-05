@@ -126,11 +126,12 @@ class GameSession:
             ],
         }
 
-    def get_round_records(self, viewer_role: str = None) -> list:
+    def get_round_records(self, viewer_role: str = None, reveal_villain: bool = False) -> list:
         """汇总历史记录为每回合展示结构（供前端左侧滚动记录框）。
 
         viewer_role 非 'evil' 时剥离 deathMarkers 中的 villainId（信息边界，
         2026-09-02 修复），正派只能看到目标与形状。
+        reveal_villain=True 时不剥离（复盘用：对局已结束，反派身份公开）。
         """
         records = []
         for h in self.history_rounds:
@@ -145,7 +146,7 @@ class GameSession:
                 entry['surveillance'] = h.get('targets', [])
             elif ptype == 'death':
                 markers = h.get('deathMarkers', [])
-                if viewer_role != 'evil':
+                if viewer_role != 'evil' and not reveal_villain:
                     markers = [{k: v for k, v in m.items() if k != 'villainId'}
                                for m in markers]
                 entry['death'] = {
@@ -415,7 +416,7 @@ class GameSession:
             'villains': self.villains,
             # 复盘阶段身份已公开：用不脱敏的聚合回合记录（含 villainId），
             # 正派回放时也能看到死亡标记的真实行动者
-            'history': self.get_round_records(None),
+            'history': self.get_round_records(None, reveal_villain=True),
             'finalBoard': [{'id': c['id'], 'role': c['role'], 'status': c['status']}
                            for c in self.board],
             'winner': self.winner,
