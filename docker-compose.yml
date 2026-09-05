@@ -63,6 +63,11 @@ services:
       AGENT_LLM_BASE_URL: ${AGENT_LLM_BASE_URL:-}
       AGENT_LLM_API_KEY: ${AGENT_LLM_API_KEY:-}
       AGENT_LLM_MODEL: ${AGENT_LLM_MODEL:-deepseek-chat}
+      # ===== 双人对局训练数据录制（on 时写入 dataset 卷）=====
+      RECORD_MATCH: ${RECORD_MATCH:-off}
+    volumes:
+      # 双人对局录制数据持久化（RECORD_MATCH=on 时写入 /app/dataset）
+      - ./dataset:/app/dataset
     depends_on:
       mysql:
         condition: service_healthy
