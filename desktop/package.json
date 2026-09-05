@@ -15,7 +15,7 @@
     "appId": "com.happythreads.game",
     "productName": "幸せの糸",
     "directories": {
-      "output": "release12"
+      "output": "release13"
     },
     "files": [
       "main.js",
