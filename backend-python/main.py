@@ -16,6 +16,7 @@ from routes.room import router as room_router
 from services.room_manager import room_manager
 from middleware.auth import verify_token
 from services.game_engine import Phase
+from services import recorder
 
 load_dotenv()
 
@@ -59,6 +60,14 @@ async def _room_sids(room_id: str) -> list:
         return []
 
 
+def _maybe_record(session):
+    """RECORD_MATCH=on 且为双人模式时，保存训练记录（弃赛局不走到 finished，天然被排除）"""
+    if os.getenv('RECORD_MATCH', 'off').lower() == 'on' and session.mode != 'single':
+        path = recorder.save(session)
+        if path:
+            print(f'[Recorder] 对局记录已保存: {path}')
+
+
 async def broadcast_game_state(room_id: str, extra: dict = None):
     """按玩家角色分别广播游戏状态给房间内所有玩家"""
     session = room_manager.get_room(room_id)
@@ -85,6 +94,7 @@ async def broadcast_game_state(room_id: str, extra: dict = None):
         await sio.emit('game:state', state, to=sid)
 
     if session.status == 'finished':
+        _maybe_record(session)
         await sio.emit('game:result', {
             'winner': session.winner,
             'detail': session.get_record_detail(),
@@ -187,6 +197,9 @@ def start_turn(room_id: str, player: str):
     """开始某玩家回合的倒计时"""
     session = room_manager.get_room(room_id)
     if not session or session.status != 'playing':
+        return
+    # 环境变量 TURN_TIMER=off 时关闭回合倒计时（训练数据采集期，便于真人慢慢决策）
+    if os.getenv('TURN_TIMER', 'on').lower() == 'off':
         return
     deadline = time.time() + TURN_SECONDS
     session.turn_deadline = deadline

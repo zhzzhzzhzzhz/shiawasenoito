@@ -54,6 +54,10 @@ class GameSession:
         self.disconnect_player_id = None   # 当前断线等待重连的玩家 id
         self.disconnect_deadline = None    # 重连截止时间戳（epoch 秒）
 
+        # 训练数据采集：决策步骤记录（状态 → 动作），对局结束时由 recorder 落盘
+        self.training_steps = []
+        self.recorded = False
+
     def get_state(self, viewer_role: str = None) -> dict:
         return {
             'roomId': self.room_id,
@@ -169,6 +173,10 @@ class GameSession:
         if not isinstance(targets, list) or len(targets) != 3:
             return {'success': False, 'error': '必须选择3个监视目标'}
 
+        # 决策前快照（训练数据：正派监视的状态 → 动作）
+        board_before = copy.deepcopy(self.board)
+        history_before = copy.deepcopy(self.history_rounds)
+
         results = place_surveillance(self.board, targets, self.round)
         failed = [r for r in results if not r['success']]
         if failed:
@@ -178,6 +186,14 @@ class GameSession:
         self.history_rounds.append({
             'round': self.round, 'phase': 'placement',
             'type': 'surveillance', 'targets': targets,
+        })
+
+        # 记录正派监视决策（状态 → 动作）
+        self.training_steps.append({
+            'type': 'good_watch',
+            'round': self.round,
+            'state': {'board': board_before, 'history': history_before},
+            'action': {'targets': targets},
         })
 
         # 若所有反派均被监视/死亡 → 正派立即获胜，防止反派无法行动导致卡死
@@ -217,6 +233,11 @@ class GameSession:
             if count > card_shape_counts.get(shape, 0):
                 return {'success': False, 'error': '死亡标记形状与行动卡不符'}
 
+        # 决策前快照（训练数据：反派行动的状态 → 动作）
+        board_before = copy.deepcopy(self.board)
+        hand_before = copy.deepcopy(self.hand_cards)
+        history_before = copy.deepcopy(self.history_rounds)
+
         for action in death_actions:
             result = place_death_marker(
                 self.board, action['villainId'], action['targetId'],
@@ -230,6 +251,15 @@ class GameSession:
             'round': self.round, 'phase': 'action', 'type': 'death',
             'cardIndex': card_index, 'deathMarkers': death_actions,
             'boardSnapshot': copy.deepcopy(self.board),
+        })
+
+        # 记录反派行动决策（状态 → 动作）
+        self.training_steps.append({
+            'type': 'evil_action',
+            'round': self.round,
+            'state': {'board': board_before, 'handCards': hand_before,
+                      'history': history_before},
+            'action': {'cardIndex': card_index, 'actions': death_actions},
         })
         # 保存公示数据：行动卡 + 死亡标记对象（供正派推理附加监视）
         self.reveal_data = {
@@ -387,4 +417,18 @@ class GameSession:
                            for c in self.board],
             'winner': self.winner,
             'totalRounds': self.round,
+        }
+
+    def get_training_record(self) -> dict:
+        """汇总训练数据集记录（完整对局 + 状态→动作决策步骤）"""
+        return {
+            'roomId': self.room_id,
+            'mode': self.mode,
+            'villains': self.villains,
+            'winner': self.winner,
+            'totalRounds': self.round,
+            'goodPlayerId': self.good_player_id,
+            'evilPlayerId': self.evil_player_id,
+            'aiDifficulty': self.ai_difficulty,
+            'steps': self.training_steps,
         }
