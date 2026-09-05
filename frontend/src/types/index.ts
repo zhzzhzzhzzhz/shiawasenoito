@@ -132,7 +132,7 @@ export interface RoundRecord {
   death: {
     cardIndex: number;
     cardDescription: string;
-    deathMarkers: Array<{ villainId: number; targetId: number; shape: string }>;
+    deathMarkers: Array<{ villainId: number | undefined; targetId: number; shape: string }>;
   } | null;                        // 反派出牌+标记
   result: {
     marked: Array<{ charId: number; role: string; shapes: string[] }>;

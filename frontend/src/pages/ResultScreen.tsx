@@ -9,9 +9,10 @@ type Slide =
   | { type: 'round'; round: number; record: RoundRecord; deadIds: Set<number> }
   | { type: 'result' };
 
-/** 复盘角色卡：插画 + 编号 + 状态叠加（反派红框 / 死亡置灰 / 监视蓝标） */
+/** 复盘角色卡：插画 + 编号 + 状态叠加（反派红框 / 死亡置灰 / 监视蓝标）
+ *  id 可能缺失（正派视角死亡标记的 villainId 被后端脱敏）——此时渲染隐藏牌背占位，不请求图片 */
 function ReplayCharCard({ id, illustVersion, evil, dead, watched, watchRound }: {
-  id: number;
+  id: number | undefined;
   illustVersion: 'v1' | 'v2';
   evil?: boolean;
   dead?: boolean;
@@ -19,6 +20,7 @@ function ReplayCharCard({ id, illustVersion, evil, dead, watched, watchRound }: 
   watchRound?: number;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
+  const isUnknown = id == null;
   const border = evil
     ? 'border-red-500'
     : watched
@@ -29,7 +31,12 @@ function ReplayCharCard({ id, illustVersion, evil, dead, watched, watchRound }: 
 
   return (
     <div className={`relative w-16 h-20 rounded-lg overflow-hidden border-2 shrink-0 ${border} ${dead ? 'opacity-70' : ''}`}>
-      {imgFailed ? (
+      {isUnknown ? (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-[#12122e] text-white/50">
+          <span className="text-xl font-bold leading-none">?</span>
+          <span className="text-[9px] mt-1 tracking-widest">未知</span>
+        </div>
+      ) : imgFailed ? (
         <div className="w-full h-full flex items-center justify-center bg-[#1a1a3e] text-sm text-white/60 font-bold">
           #{id}
         </div>
@@ -42,9 +49,11 @@ function ReplayCharCard({ id, illustVersion, evil, dead, watched, watchRound }: 
           draggable={false}
         />
       )}
-      <span className="absolute top-0.5 left-0.5 text-[10px] font-bold text-white bg-black/40 px-1 rounded leading-tight">
-        #{id}
-      </span>
+      {!isUnknown && (
+        <span className="absolute top-0.5 left-0.5 text-[10px] font-bold text-white bg-black/40 px-1 rounded leading-tight">
+          #{id}
+        </span>
+      )}
       {evil && (
         <span className="absolute top-0.5 right-0.5 text-[10px] font-bold text-red-300 bg-black/40 px-1 rounded leading-tight">反</span>
       )}
@@ -61,9 +70,10 @@ function ReplayCharCard({ id, illustVersion, evil, dead, watched, watchRound }: 
   );
 }
 
-/** 标记关系：反派卡 → 箭头（上方带标记插画）→ 目标卡 */
+/** 标记关系：反派卡 → 箭头（上方带标记插画）→ 目标卡
+ *  villainId 可能缺失（正派视角脱敏）——渲染「未知行动者」隐藏牌背 */
 function MarkerRelation({ villainId, targetId, shape, round, illustVersion }: {
-  villainId: number;
+  villainId: number | undefined;
   targetId: number;
   shape: string;
   round: number;
