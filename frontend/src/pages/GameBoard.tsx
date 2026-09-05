@@ -14,7 +14,7 @@ import RoundRecordsPanel from '../components/RoundRecordsPanel';
 import ActionCardHistory from '../components/ActionCardHistory';
 import ActionCardReveal from '../components/ActionCardReveal';
 import { getAffectedCharIds, charIdToPos } from '../utils/board';
-import { readMarkerDragData } from '../utils/drag';
+import { readMarkerDragData, setMarkerDragData } from '../utils/drag';
 import { randomBackground, backgroundUrl, getBackgroundFiles } from '../config/illustrations';
 import type { DeathAction } from '../types';
 
@@ -39,6 +39,12 @@ export default function GameBoardPage() {
   const [selectedVillain, setSelectedVillain] = useState<number | null>(null);
   // 拖拽中的死亡标记形状（用于实时范围预览；形状由拖动的标记决定）
   const [dragShape, setDragShape] = useState<'九宫格' | '十字' | null>(null);
+  // 待确认标记（拖放到角色卡后先进入确认态，点击 ✓ 才生效；✗ 或拖回面板取消）
+  const [pendingMarker, setPendingMarker] = useState<{
+    kind: 'death' | 'surveillance';
+    targetId: number;
+    shape?: '九宫格' | '十字';
+  } | null>(null);
   const [localDeathActions, setLocalDeathActions] = useState<DeathAction[]>([]);
   // 反派开局确认：是否已查看本局三位反派角色（确认后关闭遮罩）
   const [villainConfirmed, setVillainConfirmed] = useState(false);
@@ -322,15 +328,15 @@ export default function GameBoardPage() {
   };
 
   const cancelEvilAction = () => {
+    setPendingMarker(null);
+    setDragShape(null);
     if (evilStep === 'select-target') {
       setEvilStep('select-villain');
       setSelectedVillain(null);
-      setDragShape(null);
     } else if (evilStep === 'select-villain') {
       setEvilStep('select-card');
       setSelectedCard(null);
       setSelectedVillain(null);
-      setDragShape(null);
       setLocalDeathActions([]);
     }
   };
@@ -347,17 +353,43 @@ export default function GameBoardPage() {
     return null;
   }, [goodCanSelect, canPlayAction, evilStep, board, rangeIds]);
 
-  // ---- 角色卡拖拽放置分派 ----
+  // ---- 角色卡拖拽放置分派：先进入待确认态，确认后才生效 ----
   const handleCharacterDrop = useCallback((e: React.DragEvent, charId: number) => {
     e.preventDefault();
     const payload = readMarkerDragData(e);
     if (!payload) return;
     if (payload.kind === 'surveillance') {
-      handleGoodCharClick(charId);
+      setPendingMarker({ kind: 'surveillance', targetId: charId });
     } else if (payload.kind === 'death') {
-      placeDeathMarker(charId, payload.shape);
+      setPendingMarker({ kind: 'death', targetId: charId, shape: payload.shape });
     }
-  }, [handleGoodCharClick, placeDeathMarker]);
+    setDragShape(null);
+  }, []);
+
+  // ---- 待确认标记：确认放置（此时才真正生效） ----
+  const confirmPendingMarker = useCallback(() => {
+    if (!pendingMarker) return;
+    if (pendingMarker.kind === 'surveillance') {
+      handleGoodCharClick(pendingMarker.targetId);
+    } else if (pendingMarker.shape) {
+      placeDeathMarker(pendingMarker.targetId, pendingMarker.shape);
+    }
+    setPendingMarker(null);
+  }, [pendingMarker, handleGoodCharClick, placeDeathMarker]);
+
+  // ---- 待确认标记：取消（点击 ✗ 或拖回面板） ----
+  const cancelPendingMarker = useCallback(() => {
+    setPendingMarker(null);
+    setDragShape(null);
+  }, []);
+
+  // ---- 待确认标记拖回面板：作为拖拽源携带原 payload ----
+  const handlePendingDragStart = useCallback((e: React.DragEvent) => {
+    if (!pendingMarker) return;
+    setMarkerDragData(e, pendingMarker.kind === 'death'
+      ? { kind: 'death', shape: pendingMarker.shape! }
+      : { kind: 'surveillance' });
+  }, [pendingMarker]);
 
   const allActionsDone = localDeathActions.length === maxActions && maxActions > 0;
 
@@ -423,6 +455,10 @@ export default function GameBoardPage() {
           }
           dropTargetIds={dropTargetIds}
           onCharacterDrop={handleCharacterDrop}
+          pendingMarkerTarget={pendingMarker?.targetId ?? null}
+          onConfirmMarker={confirmPendingMarker}
+          onCancelMarker={cancelPendingMarker}
+          onPendingDragStart={handlePendingDragStart}
         />
       </motion.div>
     </div>
@@ -505,6 +541,7 @@ export default function GameBoardPage() {
               surveillancePlaced={surveillanceTargets.length}
               canPlaceSurveillance={goodCanSelect}
               onMarkerDragEnd={() => setDragShape(null)}
+              onMarkerReturn={pendingMarker ? cancelPendingMarker : undefined}
             />
             {/* 棋盘在右 */}
             {boardArea}
@@ -527,6 +564,7 @@ export default function GameBoardPage() {
               getRemainingCount={getRemainingCount}
               onDeathMarkerDragStart={(shape) => setDragShape(shape)}
               onMarkerDragEnd={() => setDragShape(null)}
+              onMarkerReturn={pendingMarker ? cancelPendingMarker : undefined}
             />
             {/* 反派视角右侧：行动卡公示历史 */}
             <ActionCardHistory records={roundRecords} />

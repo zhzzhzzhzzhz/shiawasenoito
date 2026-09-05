@@ -21,6 +21,8 @@ interface MarkerPanelProps {
   getRemainingCount?: (shape: '九宫格' | '十字') => number;
   onDeathMarkerDragStart?: (shape: '九宫格' | '十字') => void;
   onMarkerDragEnd?: () => void;
+  /** 待确认标记拖回本面板时触发（取消放置） */
+  onMarkerReturn?: () => void;
   // ---- 正派 ----
   maxSurveillance?: number;
   surveillancePlaced?: number;
@@ -85,11 +87,15 @@ export default function MarkerPanel({
   handCards = [], selectedCard = null, onCardSelect,
   canPlayAction = false, remainingShapes = new Set(),
   getRemainingCount = () => 0,
-  onDeathMarkerDragStart, onMarkerDragEnd,
+  onDeathMarkerDragStart, onMarkerDragEnd, onMarkerReturn,
   maxSurveillance = 3, surveillancePlaced = 0, canPlaceSurveillance = false,
 }: MarkerPanelProps) {
   return (
-    <div className="w-32 flex-shrink-0 flex flex-col items-center gap-4 h-full py-1 overflow-y-auto">
+    <div
+      className="w-32 flex-shrink-0 flex flex-col items-center gap-4 h-full py-1 overflow-y-auto"
+      onDragOver={(e) => { if (onMarkerReturn) e.preventDefault(); }}
+      onDrop={(e) => { if (onMarkerReturn) { e.preventDefault(); onMarkerReturn(); } }}
+    >
       {role === 'evil' ? (
         <>
           {/* 行动卡 */}

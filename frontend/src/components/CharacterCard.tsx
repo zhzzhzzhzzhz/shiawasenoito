@@ -42,12 +42,19 @@ interface CharacterCardProps {
   dropTarget?: boolean;
   onDragOver?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent) => void;
+  /** 该卡上存在待确认标记：显示确认/取消浮层，未确认不生效 */
+  pendingConfirm?: boolean;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  /** 待确认状态下拖回待放置区（取消）的拖拽起点回调 */
+  onPendingDragStart?: (e: React.DragEvent) => void;
 }
 
 export default function CharacterCard({
   char, viewerRole, isSelected, onClick, disabled,
   dimmed = false, inRange = false, villainHighlight = false,
   dropTarget = false, onDragOver, onDrop,
+  pendingConfirm = false, onConfirm, onCancel, onPendingDragStart,
 }: CharacterCardProps) {
   const isDead = char.status === 'dead' || char.status === 'default_dead';
   const hasActiveSurveillance = char.hasSurveillance && char.surveillanceActive;
@@ -195,6 +202,41 @@ export default function CharacterCard({
         <motion.div className="absolute inset-0 z-20 flex items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
             style={{ background: 'rgba(124, 58, 237, 0.6)' }}>✓</div>
+        </motion.div>
+      )}
+
+      {/* 待确认标记浮层：确认放置 ✓ / 取消 ✗（未确认前不生效，可拖回待放置区） */}
+      {pendingConfirm && (
+        <motion.div
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-1.5 rounded-lg"
+          style={{ background: 'rgba(10, 10, 26, 0.72)' }}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              role="button"
+              title="确认放置"
+              onClick={(e) => { e.stopPropagation(); onConfirm?.(); }}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-bold cursor-pointer
+                bg-emerald-500/90 text-white hover:bg-emerald-400 transition-colors"
+            >✓</span>
+            <span
+              role="button"
+              title="取消（可拖回面板）"
+              onClick={(e) => { e.stopPropagation(); onCancel?.(); }}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-bold cursor-pointer
+                bg-rose-500/90 text-white hover:bg-rose-400 transition-colors"
+            >✕</span>
+          </div>
+          {/* 拖拽把手：按住可把待确认标记拖回标记面板（取消放置） */}
+          <div
+            draggable
+            onDragStart={(e) => { e.stopPropagation(); onPendingDragStart?.(e); }}
+            className="flex items-center gap-1 text-[9px] text-white/70 tracking-wider cursor-grab active:cursor-grabbing select-none"
+            title="拖回面板取消"
+          >
+            <span className="text-[10px]">⤺</span>拖回取消
+          </div>
         </motion.div>
       )}
     </motion.button>
