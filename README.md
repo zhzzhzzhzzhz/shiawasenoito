@@ -13,9 +13,11 @@
 ## 游戏截图
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/49a93133-8853-4093-b192-0abf2f6de0a2" alt="游戏截图" width="45%" />
+  <img src="https://github.com/user-attachments/assets/49a93133-8853-4093-b192-0abf2f6de0a2" alt="游戏截图" width="30%" />
   &nbsp;&nbsp;
-  <img src="https://github.com/user-attachments/assets/b7bb17fc-a39b-45d6-a81d-c379c4d19331" alt="游戏截图" width="45%" />
+  <img src="https://github.com/user-attachments/assets/b7bb17fc-a39b-45d6-a81d-c379c4d19331" alt="游戏截图" width="30%" />
+  &nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/9f62bb97-868b-4768-83d9-d2c70bb94d6f" alt="游戏截图" width="30%" />
 </div>
 
 ## 技术架构
