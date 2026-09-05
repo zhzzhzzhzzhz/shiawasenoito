@@ -82,6 +82,9 @@ export default function MultiModeSelect() {
 
   const enterRoom = () => {
     if (roomId && mode === 'invite') {
+      // 进入房间：邀请码立即销毁（后端拒绝再加入），前端同步清码
+      getSocket()?.emit('game:invite_enter', { roomId });
+      useGameStore.getState().setInviteCode(null);
       navigate('/multi/game');
     }
   };

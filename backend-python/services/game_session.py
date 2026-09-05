@@ -43,6 +43,7 @@ class GameSession:
         self.good_player_ready = False
         self.evil_player_ready = False
         self.reveal_data = None  # 公示数据（行动卡 + 死亡标记）
+        self.invite_consumed = False  # 邀请码是否已销毁（房主进入房间后置 True，拒绝再加入）
 
         # 回合倒计时（双人模式）
         self.turn_deadline = None   # 回合截止时间戳（epoch 秒）

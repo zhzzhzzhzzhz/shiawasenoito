@@ -438,6 +438,16 @@ export default function GameBoardPage() {
     }
   };
 
+  // ---- 等待阶段离开房间（邀请码作废，双方可重新创建/加入） ----
+  const handleLeaveRoom = () => {
+    const sock = getSocket();
+    if (sock && roomId) {
+      sock.emit('game:leave_room', { roomId });
+    }
+    useGameStore.getState().reset();
+    navigate('/multi');
+  };
+
   // ---- 对局操作：退出 / 投降 / 放弃 ----
   const ACTION_CONFIG = {
     quit: {
@@ -799,6 +809,12 @@ export default function GameBoardPage() {
             ) : (
               <div className="text-[var(--color-text-dim)] text-sm">已准备，等待对方...</div>
             )}
+            <button
+              onClick={handleLeaveRoom}
+              className="w-full mt-3 py-2.5 rounded-lg border border-white/15 text-sm text-gray-400 hover:border-rose-400/40 hover:text-rose-300 transition-all"
+            >
+              离开房间（邀请码将作废）
+            </button>
           </div>
         </div>
       )}

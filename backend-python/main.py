@@ -622,6 +622,53 @@ async def game_create_invite(sid, data):
     }, to=sid)
 
 
+@sio.on('game:invite_enter')
+async def game_invite_enter(sid, data):
+    """房主点击「进入房间」：邀请码立即销毁，之后任何人无法再用该码加入"""
+    room_id = data.get('roomId') if isinstance(data, dict) else None
+    if not room_id:
+        return
+    async with sio.session(sid) as session:
+        user = session.get('user', {})
+        player_id = user.get('id')
+    sess = room_manager.get_room(room_id)
+    if not sess or sess.mode != 'invite':
+        return
+    # 仅房主可销毁邀请码
+    if player_id not in (sess.good_player_id, sess.evil_player_id):
+        return
+    sess.invite_consumed = True
+    print(f'[Socket] 邀请码销毁: room={room_id}')
+
+
+@sio.on('game:leave_room')
+async def game_leave_room(sid, data):
+    """等待阶段主动离开房间：房间只剩一人时销毁房间，双方都可重新走创建/加入流程"""
+    room_id = data.get('roomId') if isinstance(data, dict) else None
+    if not room_id:
+        return
+    async with sio.session(sid) as session:
+        user = session.get('user', {})
+        player_id = user.get('id')
+    sess = room_manager.get_room(room_id)
+    if not sess or sess.status != 'waiting':
+        return
+    if player_id not in (sess.good_player_id, sess.evil_player_id):
+        return
+    room_manager.leave_room(player_id)
+    await sio.leave_room(sid, room_id)
+
+    other_id = sess.evil_player_id if player_id == sess.good_player_id else sess.good_player_id
+    if other_id is None:
+        # 只剩离开者一人 → 房间销毁
+        room_manager.remove_room(room_id)
+        print(f'[Socket] 等待阶段离开并销毁房间: room={room_id}')
+    else:
+        # 通知留守方
+        await sio.emit('game:opponent_left',
+                       {'message': '对手已离开房间'}, room=room_id)
+
+
 @sio.on('game:join_by_invite')
 async def game_join_by_invite(sid, data):
     """好友凭邀请码（房间号）加入邀请房间"""
@@ -633,6 +680,9 @@ async def game_join_by_invite(sid, data):
     sess = room_manager.get_room(invite_code)
     if not sess or sess.mode != 'invite':
         await sio.emit('game:error', {'code': 2001, 'message': '邀请码无效'}, to=sid)
+        return
+    if getattr(sess, 'invite_consumed', False):
+        await sio.emit('game:error', {'code': 2005, 'message': '邀请码已失效（房主已进入房间）'}, to=sid)
         return
     if sess.status != 'waiting':
         await sio.emit('game:error', {'code': 2004, 'message': '房间已满或已开始'}, to=sid)

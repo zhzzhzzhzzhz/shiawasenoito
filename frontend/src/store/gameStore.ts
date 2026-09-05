@@ -74,7 +74,7 @@ interface GameStore {
   setConnected: (connected: boolean) => void;
   setUser: (user: User | null, token: string | null) => void;
   setRoom: (roomId: string, mode: GameMode, role: GameRole | null) => void;
-  setInviteCode: (code: string) => void;
+  setInviteCode: (code: string | null) => void;
   setRoomInfo: (info: RoomInfo) => void;
   setGameState: (state: Partial<{
     phase: GamePhase; round: number; board: CharacterState[];
