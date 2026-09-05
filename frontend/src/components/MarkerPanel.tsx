@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ActionCardDef } from '../types';
 import ActionCardComp from './ActionCardComp';
 import { markerIllustration, surveillanceIllustration } from '../config/illustrations';
-import { setMarkerDragData } from '../utils/drag';
+import { setMarkerDragData, readMarkerDragData } from '../utils/drag';
 
 const shapeLabel: Record<string, string> = {
   '九宫格': '九宫格',
@@ -23,6 +23,8 @@ interface MarkerPanelProps {
   onMarkerDragEnd?: () => void;
   /** 待确认标记拖回本面板时触发（取消放置） */
   onMarkerReturn?: () => void;
+  /** 已放置的本地标记拖回本面板时触发（移除该行动，传入 targetId） */
+  onRemoveLocalMarker?: (targetId: number) => void;
   // ---- 正派 ----
   maxSurveillance?: number;
   surveillancePlaced?: number;
@@ -87,14 +89,24 @@ export default function MarkerPanel({
   handCards = [], selectedCard = null, onCardSelect,
   canPlayAction = false, remainingShapes = new Set(),
   getRemainingCount = () => 0,
-  onDeathMarkerDragStart, onMarkerDragEnd, onMarkerReturn,
+  onDeathMarkerDragStart, onMarkerDragEnd, onMarkerReturn, onRemoveLocalMarker,
   maxSurveillance = 3, surveillancePlaced = 0, canPlaceSurveillance = false,
 }: MarkerPanelProps) {
+  const canAcceptDrop = !!onMarkerReturn || !!onRemoveLocalMarker;
   return (
     <div
       className="w-32 flex-shrink-0 flex flex-col items-center gap-4 h-full py-1 overflow-y-auto"
-      onDragOver={(e) => { if (onMarkerReturn) e.preventDefault(); }}
-      onDrop={(e) => { if (onMarkerReturn) { e.preventDefault(); onMarkerReturn(); } }}
+      onDragOver={(e) => { if (canAcceptDrop) e.preventDefault(); }}
+      onDrop={(e) => {
+        if (!canAcceptDrop) return;
+        e.preventDefault();
+        const payload = readMarkerDragData(e);
+        if (payload?.kind === 'remove-local' && onRemoveLocalMarker) {
+          onRemoveLocalMarker(payload.targetId);
+        } else if (onMarkerReturn) {
+          onMarkerReturn();
+        }
+      }}
     >
       {role === 'evil' ? (
         <>

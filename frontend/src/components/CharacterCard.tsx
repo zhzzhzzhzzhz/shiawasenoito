@@ -48,6 +48,12 @@ interface CharacterCardProps {
   onCancel?: () => void;
   /** 待确认状态下拖回待放置区（取消）的拖拽起点回调 */
   onPendingDragStart?: (e: React.DragEvent) => void;
+  /** 本地已确认放置的标记形状（回合提交前可反悔移除） */
+  localMarkerShape?: '九宫格' | '十字' | null;
+  /** 点击移除本地已放置标记 */
+  onRemoveLocalMarker?: () => void;
+  /** 拖动已放置标记回面板（移除）的拖拽起点回调 */
+  onLocalMarkerDragStart?: (e: React.DragEvent) => void;
 }
 
 export default function CharacterCard({
@@ -55,6 +61,7 @@ export default function CharacterCard({
   dimmed = false, inRange = false, villainHighlight = false,
   dropTarget = false, onDragOver, onDrop,
   pendingConfirm = false, onConfirm, onCancel, onPendingDragStart,
+  localMarkerShape = null, onRemoveLocalMarker, onLocalMarkerDragStart,
 }: CharacterCardProps) {
   const isDead = char.status === 'dead' || char.status === 'default_dead';
   const hasActiveSurveillance = char.hasSurveillance && char.surveillanceActive;
@@ -133,7 +140,13 @@ export default function CharacterCard({
     <motion.button
       className={className}
       style={{ background: bgColor, borderColor, ...extraStyle }}
-      onClick={onClick}
+      onClick={() => {
+        if (localMarkerShape) {
+          onRemoveLocalMarker?.();
+        } else {
+          onClick();
+        }
+      }}
       disabled={disabled || (dimmed && !villainHighlight)}
       whileHover={(disabled || dimmed) ? {} : { scale: 1.05, y: -4 }}
       whileTap={(disabled || dimmed) ? {} : { scale: 0.95 }}
@@ -203,6 +216,32 @@ export default function CharacterCard({
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
             style={{ background: 'rgba(124, 58, 237, 0.6)' }}>✓</div>
         </motion.div>
+      )}
+
+      {/* 本地已放置标记（回合提交前可点击/拖回移除） */}
+      {localMarkerShape && (
+        <div className="absolute inset-0 z-[25] flex flex-col items-center justify-center pointer-events-none">
+          <span
+            className="w-9 h-9 flex items-center justify-center text-xl leading-none rounded-full"
+            style={{
+              background: `${localMarkerShape === '九宫格' ? '#f59e0b' : '#ec4899'}40`,
+              border: `2px solid ${localMarkerShape === '九宫格' ? '#f59e0b' : '#ec4899'}`,
+              boxShadow: '0 0 10px rgba(0,0,0,0.6)',
+            }}
+          >
+            {localMarkerShape === '九宫格' ? '▦' : '✚'}
+          </span>
+          <span className="text-[8px] mt-0.5 px-1 rounded bg-black/60 text-white/80">
+            点击移除
+          </span>
+          {/* 拖回面板把手 */}
+          <span
+            draggable
+            onDragStart={(e) => { e.stopPropagation(); onLocalMarkerDragStart?.(e); }}
+            className="pointer-events-auto mt-0.5 text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-white/70 cursor-grab active:cursor-grabbing select-none"
+            title="拖回面板移除"
+          >⤺</span>
+        </div>
       )}
 
       {/* 待确认标记浮层：确认放置 ✓ / 取消 ✗（未确认前不生效，可拖回待放置区） */}

@@ -18,6 +18,10 @@ interface BoardProps {
   onConfirmMarker?: () => void;
   onCancelMarker?: () => void;
   onPendingDragStart?: (e: React.DragEvent) => void;
+  /** 本地已确认放置的标记（targetId → 形状，回合提交前可反悔移除） */
+  localMarkers?: Map<number, '九宫格' | '十字'>;
+  onRemoveLocalMarker?: (targetId: number) => void;
+  onLocalMarkerDragStart?: (e: React.DragEvent, targetId: number) => void;
 }
 
 export default function Board({
@@ -25,6 +29,7 @@ export default function Board({
   interactive, dimmedIds, villainHighlightIds, rangeIds,
   dropTargetIds = null, onCharacterDrop,
   pendingMarkerTarget = null, onConfirmMarker, onCancelMarker, onPendingDragStart,
+  localMarkers, onRemoveLocalMarker, onLocalMarkerDragStart,
 }: BoardProps) {
   return (
     <div className="board-grid">
@@ -36,6 +41,7 @@ export default function Board({
         const villain = villainHighlightIds ? villainHighlightIds.has(char.id) : false;
         const canDrop = dropTargetIds ? dropTargetIds.has(char.id) : false;
         const isPending = pendingMarkerTarget === char.id;
+        const localShape = localMarkers?.get(char.id) ?? null;
 
         return (
           <CharacterCard
@@ -55,6 +61,9 @@ export default function Board({
             onConfirm={isPending ? onConfirmMarker : undefined}
             onCancel={isPending ? onCancelMarker : undefined}
             onPendingDragStart={isPending ? onPendingDragStart : undefined}
+            localMarkerShape={localShape}
+            onRemoveLocalMarker={localShape ? () => onRemoveLocalMarker?.(char.id) : undefined}
+            onLocalMarkerDragStart={localShape ? (e) => onLocalMarkerDragStart?.(e, char.id) : undefined}
           />
         );
       })}

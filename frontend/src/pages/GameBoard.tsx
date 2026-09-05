@@ -403,6 +403,23 @@ export default function GameBoardPage() {
       : { kind: 'surveillance' });
   }, [pendingMarker]);
 
+  // ---- 本地已放置标记（回合提交前可反悔）：targetId → 形状 ----
+  const localMarkers = useMemo(() => {
+    const m = new Map<number, '九宫格' | '十字'>();
+    for (const a of localDeathActions) m.set(a.targetId, a.shape);
+    return m;
+  }, [localDeathActions]);
+
+  // 点击移除已放置的本地标记（从待提交行动中删除）
+  const removeLocalDeathAction = useCallback((targetId: number) => {
+    setLocalDeathActions((prev) => prev.filter((a) => a.targetId !== targetId));
+  }, []);
+
+  // 已放置标记拖回面板：携带移除 payload
+  const handleLocalMarkerDragStart = useCallback((e: React.DragEvent, targetId: number) => {
+    setMarkerDragData(e, { kind: 'remove-local', targetId });
+  }, []);
+
   const allActionsDone = localDeathActions.length === maxActions && maxActions > 0;
 
   // ---- 某形状剩余可用次数 ----
@@ -519,6 +536,9 @@ export default function GameBoardPage() {
           onConfirmMarker={confirmPendingMarker}
           onCancelMarker={cancelPendingMarker}
           onPendingDragStart={handlePendingDragStart}
+          localMarkers={localMarkers}
+          onRemoveLocalMarker={removeLocalDeathAction}
+          onLocalMarkerDragStart={handleLocalMarkerDragStart}
         />
       </motion.div>
     </div>
@@ -702,6 +722,7 @@ export default function GameBoardPage() {
               onDeathMarkerDragStart={(shape) => setDragShape(shape)}
               onMarkerDragEnd={() => setDragShape(null)}
               onMarkerReturn={pendingMarker ? cancelPendingMarker : undefined}
+              onRemoveLocalMarker={removeLocalDeathAction}
             />
             {/* 反派视角右侧：行动卡公示历史 */}
             <ActionCardHistory records={roundRecords} />

@@ -196,6 +196,12 @@ export default function ResultScreen() {
   const iWin = !!myRole && winner === myRole;
   const againPath = mode === 'single' ? '/single' : '/multi';
 
+  // 离开结算页：清除上一局全部对局信息（训练数据已在服务器落盘，前端无需保留）
+  const handleExit = (path: string) => {
+    useGameStore.getState().reset();
+    navigate(path);
+  };
+
   const current = slides[pageIndex];
   const total = slides.length;
   const isLast = pageIndex === total - 1;
@@ -274,10 +280,10 @@ export default function ResultScreen() {
                   </p>
 
                   <div className="flex flex-col gap-3">
-                    <button className="btn-premium w-full" onClick={() => navigate(againPath)}>
+                    <button className="btn-premium w-full" onClick={() => handleExit(againPath)}>
                       再来一局
                     </button>
-                    <button className="btn-secondary w-full" onClick={() => navigate('/main')}>
+                    <button className="btn-secondary w-full" onClick={() => handleExit('/main')}>
                       返回主菜单
                     </button>
                   </div>
