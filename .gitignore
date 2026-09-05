@@ -58,3 +58,7 @@ desktop/dist/
 
 # ===== 嵌套 git 仓库（独立项目，不入库）=====
 shiawasenoito/
+
+# ===== 流水线与导出产物（可复现生成，不入库）=====
+output/
+backend-python/output/

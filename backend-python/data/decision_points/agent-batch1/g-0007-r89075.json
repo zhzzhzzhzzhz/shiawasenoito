@@ -1,0 +1,5059 @@
+[
+ {
+  "sample_id": "g-0007-r89075-evil-r1-00",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "evil",
+   "round": 1,
+   "phase": "action",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     }
+    ],
+    "used_cards": [],
+    "history": []
+   },
+   "belief_state": null,
+   "legal_actions": {
+    "type": "play_action_card_full",
+    "rule": "满员行动：所选卡的 action_count_required 已替你算好，必须恰好输出该数量的 actions；villainId 互不相同；targetId 从对应 villain 的 targets 列表中选择；targetId 本回合不重复",
+    "active_villains": [
+     601,
+     502,
+     304
+    ],
+    "available_cards": [
+     {
+      "index": 0,
+      "description": "九宫格×2",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          404,
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          404,
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 1,
+      "description": "十字×2",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          605,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302,
+          202
+         ],
+         "304": [
+          604,
+          504,
+          404,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          605,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302,
+          202
+         ],
+         "304": [
+          604,
+          504,
+          404,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 2,
+      "description": "十字+九宫格",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          605,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302,
+          202
+         ],
+         "304": [
+          604,
+          504,
+          404,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          404,
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 3,
+      "description": "十字+九宫格",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          605,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302,
+          202
+         ],
+         "304": [
+          604,
+          504,
+          404,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          404,
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 4,
+      "description": "十字×2+九宫格",
+      "action_count_required": 3,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          605,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302,
+          202
+         ],
+         "304": [
+          604,
+          504,
+          404,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          605,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302,
+          202
+         ],
+         "304": [
+          604,
+          504,
+          404,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          404,
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "RuleBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "cardIndex": 4,
+    "actions": [
+     {
+      "villainId": 601,
+      "targetId": 605,
+      "shape": "十字"
+     },
+     {
+      "villainId": 502,
+      "targetId": 202,
+      "shape": "十字"
+     },
+     {
+      "villainId": 304,
+      "targetId": 404,
+      "shape": "九宫格"
+     }
+    ]
+   }
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-good-r2-01",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "good",
+   "round": 2,
+   "phase": "placement",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     }
+    ],
+    "used_cards": [
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     }
+    ]
+   },
+   "belief_state": {
+    "top5_suspects": [
+     {
+      "id": 205,
+      "prob": 0.281
+     },
+     {
+      "id": 602,
+      "prob": 0.281
+     },
+     {
+      "id": 405,
+      "prob": 0.272
+     },
+     {
+      "id": 305,
+      "prob": 0.272
+     },
+     {
+      "id": 505,
+      "prob": 0.272
+     }
+    ]
+   },
+   "legal_actions": {
+    "type": "choose_3_surveillance",
+    "candidates": [
+     601,
+     602,
+     603,
+     604,
+     501,
+     502,
+     503,
+     504,
+     505,
+     401,
+     402,
+     405,
+     301,
+     302,
+     303,
+     304,
+     305,
+     201,
+     203,
+     204,
+     205
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "AgentBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "targets": [
+     205,
+     602,
+     405
+    ]
+   },
+   "reasoning": "第1回合3个死亡标记（605十字、202十字、404九宫格）分别划出范围，取交集与重叠区域定位嫌疑；belief.top5_suspects给出205、602、405、305、505热度最高，直接采信前3名作为监视目标。"
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-evil-r2-02",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "evil",
+   "round": 2,
+   "phase": "action",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     }
+    ],
+    "used_cards": [
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [],
+      "card": null,
+      "skip": false
+     }
+    ]
+   },
+   "belief_state": null,
+   "legal_actions": {
+    "type": "play_action_card_full",
+    "rule": "满员行动：所选卡的 action_count_required 已替你算好，必须恰好输出该数量的 actions；villainId 互不相同；targetId 从对应 villain 的 targets 列表中选择；targetId 本回合不重复",
+    "active_villains": [
+     601,
+     502,
+     304
+    ],
+    "available_cards": [
+     {
+      "index": 0,
+      "description": "九宫格×2",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 1,
+      "description": "十字×2",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302
+         ],
+         "304": [
+          604,
+          504,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302
+         ],
+         "304": [
+          604,
+          504,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 2,
+      "description": "十字+九宫格",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302
+         ],
+         "304": [
+          604,
+          504,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 3,
+      "description": "十字+九宫格",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          501,
+          401,
+          301,
+          201
+         ],
+         "502": [
+          602,
+          501,
+          503,
+          504,
+          505,
+          402,
+          302
+         ],
+         "304": [
+          604,
+          504,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          503,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "RuleBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "cardIndex": 1,
+    "actions": [
+     {
+      "villainId": 601,
+      "targetId": 201,
+      "shape": "十字"
+     },
+     {
+      "villainId": 502,
+      "targetId": 503,
+      "shape": "十字"
+     }
+    ]
+   }
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-good-r3-03",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "good",
+   "round": 3,
+   "phase": "placement",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     }
+    ],
+    "used_cards": [
+     1,
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [
+       {
+        "targetId": 201,
+        "shape": "十字"
+       },
+       {
+        "targetId": 503,
+        "shape": "十字"
+       }
+      ],
+      "card": 1,
+      "skip": false,
+      "cardDescription": "十字×2"
+     }
+    ]
+   },
+   "belief_state": {
+    "top5_suspects": [
+     {
+      "id": 203,
+      "prob": 0.528
+     },
+     {
+      "id": 505,
+      "prob": 0.447
+     },
+     {
+      "id": 601,
+      "prob": 0.307
+     },
+     {
+      "id": 204,
+      "prob": 0.302
+     },
+     {
+      "id": 303,
+      "prob": 0.248
+     }
+    ]
+   },
+   "legal_actions": {
+    "type": "choose_3_surveillance",
+    "candidates": [
+     601,
+     602,
+     603,
+     604,
+     501,
+     502,
+     504,
+     505,
+     401,
+     402,
+     405,
+     301,
+     302,
+     303,
+     304,
+     305,
+     203,
+     204,
+     205
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "AgentBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "targets": [
+     203,
+     505,
+     602
+    ]
+   },
+   "reasoning": "第2回合标记数k=2小于牌面行动次数c=3，说明我监视的205、602、405中恰有1名真反派；结合第1回合标记范围，优先监视belief中概率最高的203、505，并保留602以维持对那3人的连贯性。"
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-evil-r3-04",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "evil",
+   "round": 3,
+   "phase": "action",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     }
+    ],
+    "used_cards": [
+     1,
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [
+       {
+        "targetId": 201,
+        "shape": "十字"
+       },
+       {
+        "targetId": 503,
+        "shape": "十字"
+       }
+      ],
+      "card": 1,
+      "skip": false,
+      "cardDescription": "十字×2"
+     },
+     {
+      "round": 3,
+      "surveillance": [
+       203,
+       505,
+       602
+      ],
+      "death": [],
+      "card": null,
+      "skip": false
+     }
+    ]
+   },
+   "belief_state": null,
+   "legal_actions": {
+    "type": "play_action_card_full",
+    "rule": "满员行动：所选卡的 action_count_required 已替你算好，必须恰好输出该数量的 actions；villainId 互不相同；targetId 从对应 villain 的 targets 列表中选择；targetId 本回合不重复",
+    "active_villains": [
+     601,
+     502,
+     304
+    ],
+    "available_cards": [
+     {
+      "index": 0,
+      "description": "九宫格×2",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 2,
+      "description": "十字+九宫格",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          501,
+          401,
+          301
+         ],
+         "502": [
+          602,
+          501,
+          504,
+          505,
+          402,
+          302
+         ],
+         "304": [
+          604,
+          504,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 3,
+      "description": "十字+九宫格",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          501,
+          401,
+          301
+         ],
+         "502": [
+          602,
+          501,
+          504,
+          505,
+          402,
+          302
+         ],
+         "304": [
+          604,
+          504,
+          301,
+          302,
+          303,
+          305,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          401,
+          402
+         ],
+         "304": [
+          405,
+          303,
+          305,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "RuleBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "cardIndex": 2,
+    "actions": [
+     {
+      "villainId": 304,
+      "targetId": 305,
+      "shape": "十字"
+     },
+     {
+      "villainId": 502,
+      "targetId": 402,
+      "shape": "九宫格"
+     }
+    ]
+   }
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-good-r4-05",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "good",
+   "round": 4,
+   "phase": "placement",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     }
+    ],
+    "used_cards": [
+     1,
+     2,
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [
+       {
+        "targetId": 201,
+        "shape": "十字"
+       },
+       {
+        "targetId": 503,
+        "shape": "十字"
+       }
+      ],
+      "card": 1,
+      "skip": false,
+      "cardDescription": "十字×2"
+     },
+     {
+      "round": 3,
+      "surveillance": [
+       203,
+       505,
+       602
+      ],
+      "death": [
+       {
+        "targetId": 305,
+        "shape": "十字"
+       },
+       {
+        "targetId": 402,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 2,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     }
+    ]
+   },
+   "belief_state": {
+    "top5_suspects": [
+     {
+      "id": 303,
+      "prob": 0.897
+     },
+     {
+      "id": 601,
+      "prob": 0.426
+     },
+     {
+      "id": 205,
+      "prob": 0.395
+     },
+     {
+      "id": 203,
+      "prob": 0.359
+     },
+     {
+      "id": 405,
+      "prob": 0.352
+     }
+    ]
+   },
+   "legal_actions": {
+    "type": "choose_3_surveillance",
+    "candidates": [
+     601,
+     602,
+     603,
+     604,
+     501,
+     502,
+     504,
+     505,
+     401,
+     405,
+     301,
+     302,
+     303,
+     304,
+     203,
+     204,
+     205
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "AgentBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "targets": [
+     303,
+     205,
+     203
+    ]
+   },
+   "reasoning": "第2回合监视[205,602,405]但标记数2<卡行动次数2，说明3人中恰有1名反派；第3回合监视[203,505,602]标记数2<卡行动次数2，同样3人中恰有1名反派。结合belief，303概率最高，优先监视；205和203在历史标记范围内命中次数较多，且与P3反推一致，故选303、205、203。"
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-evil-r4-06",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "evil",
+   "round": 4,
+   "phase": "action",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     }
+    ],
+    "used_cards": [
+     1,
+     2,
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [
+       {
+        "targetId": 201,
+        "shape": "十字"
+       },
+       {
+        "targetId": 503,
+        "shape": "十字"
+       }
+      ],
+      "card": 1,
+      "skip": false,
+      "cardDescription": "十字×2"
+     },
+     {
+      "round": 3,
+      "surveillance": [
+       203,
+       505,
+       602
+      ],
+      "death": [
+       {
+        "targetId": 305,
+        "shape": "十字"
+       },
+       {
+        "targetId": 402,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 2,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     },
+     {
+      "round": 4,
+      "surveillance": [
+       303,
+       205,
+       203
+      ],
+      "death": [],
+      "card": null,
+      "skip": false
+     }
+    ]
+   },
+   "belief_state": null,
+   "legal_actions": {
+    "type": "play_action_card_full",
+    "rule": "满员行动：所选卡的 action_count_required 已替你算好，必须恰好输出该数量的 actions；villainId 互不相同；targetId 从对应 villain 的 targets 列表中选择；targetId 本回合不重复",
+    "active_villains": [
+     601,
+     502,
+     304
+    ],
+    "available_cards": [
+     {
+      "index": 0,
+      "description": "九宫格×2",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          401
+         ],
+         "304": [
+          405,
+          303,
+          203,
+          204,
+          205
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          401
+         ],
+         "304": [
+          405,
+          303,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "index": 3,
+      "description": "十字+九宫格",
+      "action_count_required": 2,
+      "slots": [
+       {
+        "shape": "十字",
+        "targets_by_villain": {
+         "601": [
+          602,
+          603,
+          604,
+          501,
+          401,
+          301
+         ],
+         "502": [
+          602,
+          501,
+          504,
+          505,
+          302
+         ],
+         "304": [
+          604,
+          504,
+          301,
+          302,
+          303,
+          204
+         ]
+        }
+       },
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "601": [
+          602,
+          501
+         ],
+         "502": [
+          602,
+          603,
+          501,
+          401
+         ],
+         "304": [
+          405,
+          303,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "RuleBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "cardIndex": 3,
+    "actions": [
+     {
+      "villainId": 601,
+      "targetId": 603,
+      "shape": "十字"
+     },
+     {
+      "villainId": 502,
+      "targetId": 401,
+      "shape": "九宫格"
+     }
+    ]
+   }
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-good-r5-07",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "good",
+   "round": 5,
+   "phase": "placement",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 4,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 4,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     }
+    ],
+    "used_cards": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [
+       {
+        "targetId": 201,
+        "shape": "十字"
+       },
+       {
+        "targetId": 503,
+        "shape": "十字"
+       }
+      ],
+      "card": 1,
+      "skip": false,
+      "cardDescription": "十字×2"
+     },
+     {
+      "round": 3,
+      "surveillance": [
+       203,
+       505,
+       602
+      ],
+      "death": [
+       {
+        "targetId": 305,
+        "shape": "十字"
+       },
+       {
+        "targetId": 402,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 2,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     },
+     {
+      "round": 4,
+      "surveillance": [
+       303,
+       205,
+       203
+      ],
+      "death": [
+       {
+        "targetId": 603,
+        "shape": "十字"
+       },
+       {
+        "targetId": 401,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 3,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     }
+    ]
+   },
+   "belief_state": {
+    "top5_suspects": [
+     {
+      "id": 601,
+      "prob": 1.0
+     },
+     {
+      "id": 303,
+      "prob": 0.676
+     },
+     {
+      "id": 502,
+      "prob": 0.662
+     },
+     {
+      "id": 302,
+      "prob": 0.338
+     },
+     {
+      "id": 405,
+      "prob": 0.203
+     }
+    ]
+   },
+   "legal_actions": {
+    "type": "choose_3_surveillance",
+    "candidates": [
+     601,
+     602,
+     604,
+     501,
+     502,
+     504,
+     505,
+     405,
+     301,
+     302,
+     303,
+     304,
+     203,
+     204,
+     205
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "AgentBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "targets": [
+     601,
+     303,
+     502
+    ]
+   },
+   "reasoning": "第5回合是最后情报回合，belief显示601概率1.0必为反派，303和502概率接近需用范围内命中计数打破平局；303落在第1回合404九宫格、第3回合402九宫格、第4回合401九宫格范围内共3次，502仅落在第2回合503十字范围内1次，故优先303；第三个目标选信念次高且未锁定的502，形成放钓位以获取标记数反馈。"
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-evil-r5-08",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "evil",
+   "round": 5,
+   "phase": "action",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "evil"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 4,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "evil"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 4,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": true,
+      "role": "good"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "evil"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "good"
+     }
+    ],
+    "used_cards": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [
+       {
+        "targetId": 201,
+        "shape": "十字"
+       },
+       {
+        "targetId": 503,
+        "shape": "十字"
+       }
+      ],
+      "card": 1,
+      "skip": false,
+      "cardDescription": "十字×2"
+     },
+     {
+      "round": 3,
+      "surveillance": [
+       203,
+       505,
+       602
+      ],
+      "death": [
+       {
+        "targetId": 305,
+        "shape": "十字"
+       },
+       {
+        "targetId": 402,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 2,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     },
+     {
+      "round": 4,
+      "surveillance": [
+       303,
+       205,
+       203
+      ],
+      "death": [
+       {
+        "targetId": 603,
+        "shape": "十字"
+       },
+       {
+        "targetId": 401,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 3,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     },
+     {
+      "round": 5,
+      "surveillance": [
+       601,
+       303,
+       502
+      ],
+      "death": [],
+      "card": null,
+      "skip": false
+     }
+    ]
+   },
+   "belief_state": null,
+   "legal_actions": {
+    "type": "play_action_card_full",
+    "rule": "满员行动：所选卡的 action_count_required 已替你算好，必须恰好输出该数量的 actions；villainId 互不相同；targetId 从对应 villain 的 targets 列表中选择；targetId 本回合不重复",
+    "active_villains": [
+     304
+    ],
+    "available_cards": [
+     {
+      "index": 0,
+      "description": "九宫格×2",
+      "action_count_required": 1,
+      "slots": [
+       {
+        "shape": "九宫格",
+        "targets_by_villain": {
+         "304": [
+          405,
+          303,
+          203,
+          204,
+          205
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "RuleBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "cardIndex": 0,
+    "actions": [
+     {
+      "villainId": 304,
+      "targetId": 203,
+      "shape": "九宫格"
+     }
+    ]
+   }
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ },
+ {
+  "sample_id": "g-0007-r89075-good-r6-09",
+  "source": "selfplay_raw",
+  "game_id": "g-0007-r89075",
+  "game_meta": {
+   "seed": 89075,
+   "villains": [
+    304,
+    502,
+    601
+   ],
+   "good_difficulty": "normal",
+   "evil_difficulty": "normal",
+   "revive403": false,
+   "result": "evil",
+   "total_rounds": 6
+  },
+  "decision_point": {
+   "side": "good",
+   "round": 6,
+   "phase": "placement",
+   "public_state": {
+    "board": [
+     {
+      "id": 601,
+      "row": 4,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 602,
+      "row": 4,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 603,
+      "row": 4,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 4,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 604,
+      "row": 4,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 605,
+      "row": 4,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 501,
+      "row": 3,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 502,
+      "row": 3,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 503,
+      "row": 3,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 504,
+      "row": 3,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 505,
+      "row": 3,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 401,
+      "row": 2,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 4,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 402,
+      "row": 2,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 403,
+      "row": 2,
+      "col": 2,
+      "status": "default_dead",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 404,
+      "row": 2,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 405,
+      "row": 2,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 301,
+      "row": 1,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 302,
+      "row": 1,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 303,
+      "row": 1,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 304,
+      "row": 1,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 305,
+      "row": 1,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 3,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 201,
+      "row": 0,
+      "col": 0,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 2,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 202,
+      "row": 0,
+      "col": 1,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "十字",
+      "deathMarkerRound": 1,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 203,
+      "row": 0,
+      "col": 2,
+      "status": "alive",
+      "hasDeathMarker": true,
+      "deathMarkerShape": "九宫格",
+      "deathMarkerRound": 5,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 204,
+      "row": 0,
+      "col": 3,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     },
+     {
+      "id": 205,
+      "row": 0,
+      "col": 4,
+      "status": "alive",
+      "hasDeathMarker": false,
+      "deathMarkerShape": null,
+      "deathMarkerRound": null,
+      "watched": false,
+      "role": "unknown"
+     }
+    ],
+    "used_cards": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "history": [
+     {
+      "round": 1,
+      "surveillance": [],
+      "death": [
+       {
+        "targetId": 605,
+        "shape": "十字"
+       },
+       {
+        "targetId": 202,
+        "shape": "十字"
+       },
+       {
+        "targetId": 404,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 4,
+      "skip": false,
+      "cardDescription": "十字×2+九宫格"
+     },
+     {
+      "round": 2,
+      "surveillance": [
+       205,
+       602,
+       405
+      ],
+      "death": [
+       {
+        "targetId": 201,
+        "shape": "十字"
+       },
+       {
+        "targetId": 503,
+        "shape": "十字"
+       }
+      ],
+      "card": 1,
+      "skip": false,
+      "cardDescription": "十字×2"
+     },
+     {
+      "round": 3,
+      "surveillance": [
+       203,
+       505,
+       602
+      ],
+      "death": [
+       {
+        "targetId": 305,
+        "shape": "十字"
+       },
+       {
+        "targetId": 402,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 2,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     },
+     {
+      "round": 4,
+      "surveillance": [
+       303,
+       205,
+       203
+      ],
+      "death": [
+       {
+        "targetId": 603,
+        "shape": "十字"
+       },
+       {
+        "targetId": 401,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 3,
+      "skip": false,
+      "cardDescription": "十字+九宫格"
+     },
+     {
+      "round": 5,
+      "surveillance": [
+       601,
+       303,
+       502
+      ],
+      "death": [
+       {
+        "targetId": 203,
+        "shape": "九宫格"
+       }
+      ],
+      "card": 0,
+      "skip": false,
+      "cardDescription": "九宫格×2"
+     }
+    ]
+   },
+   "belief_state": {
+    "top5_suspects": [
+     {
+      "id": 601,
+      "prob": 1.0
+     },
+     {
+      "id": 302,
+      "prob": 0.735
+     },
+     {
+      "id": 303,
+      "prob": 0.735
+     },
+     {
+      "id": 304,
+      "prob": 0.265
+     },
+     {
+      "id": 502,
+      "prob": 0.265
+     }
+    ]
+   },
+   "legal_actions": {
+    "type": "choose_3_surveillance",
+    "candidates": [
+     601,
+     602,
+     604,
+     501,
+     502,
+     504,
+     505,
+     405,
+     301,
+     302,
+     303,
+     304,
+     204,
+     205
+    ]
+   }
+  },
+  "ai_label": {
+   "brain": "AgentBrain",
+   "difficulty": "normal",
+   "chosen_action": {
+    "targets": [
+     601,
+     302,
+     303
+    ]
+   },
+   "reasoning": "第5回合监视601、303、502，死亡标记仅1个（203），说明3人中恰有2名反派（P3），结合belief中601概率1.0、303概率0.735，锁定601和303为反派；第6回合无反馈，按belief前三名601、302、303监视，其中302与303概率并列，用范围内命中计数打破平局：302落在历史标记（605十字、202十字、404九宫格、201十字、503十字、305十字、402九宫格、603十字、401九宫格、203九宫格）范围内次数多于303，故选302。"
+  },
+  "human_label": null,
+  "outcome": null,
+  "quality": null
+ }
+]

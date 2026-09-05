@@ -72,9 +72,12 @@ def _usage_html():
 
 def _sample_md(idx, s):
     dp = s['decision_point']
+    villains = _evil_villains(dp['public_state']['board'])
     lines = [f"### 样本 {idx:03d} · {s['sample_id']}（{dp['side']}侧 · 第{dp['round']}回合 · {dp['phase']}）",
-             '',
-             f"- **已用卡**：{dp['public_state'].get('used_cards')}",
+             '']
+    if villains:
+        lines += [f"- **我方反派**：{', '.join(map(str, villains))}（evil 侧标注的前提信息）", '']
+    lines += [f"- **已用卡**：{dp['public_state'].get('used_cards')}",
              '- **历史**：']
     for h in dp['public_state'].get('history') or []:
         lines.append(f"  - {_history_line(h)}")
@@ -105,8 +108,15 @@ def _history_line(h):
     return ' '.join(parts)
 
 
-def _board_html(board):
+def _evil_villains(board):
+    """evil 侧样本：从全知棋盘视图提取我方三名反派（标注 evil 样本的前提信息）。"""
+    ids = sorted(c['id'] for c in board if c.get('role') == 'evil')
+    return ids if ids else None
+
+
+def _board_html(board, villains=None):
     grid = {c['id']: c for c in board}
+    villains = set(villains or [])
     lines = []
     for row in range(4, -1, -1):
         cells = []
@@ -123,6 +133,8 @@ def _board_html(board):
                 tag = '九' if c.get('deathMarkerShape') == '九宫格' else '十'
             elif c.get('watched'):
                 tag = 'W'
+            if cid in villains:
+                tag = (tag or 'V') if tag else 'V'
             cells.append(f'{cid}{tag}')
         lines.append(' | '.join(cells))
     return ''.join(f'<p class="bl">{l}</p>' for l in lines)
@@ -133,6 +145,9 @@ def _sample_html(idx, s):
     hist = ''.join(f'<li>{_history_line(h)}</li>' for h in dp['public_state'].get('history') or [])
     belief = (dp.get('belief_state') or {}).get('top5_suspects') or []
     belief_txt = ', '.join(f"{t['id']}:{t['prob']}" for t in belief) if belief else '（无）'
+    villains = _evil_villains(dp['public_state']['board'])
+    villain_line = (f'<p class="evil"><strong>我方反派：{", ".join(map(str, villains))}</strong></p>'
+                    if villains else '')
     anno = ('<p class="anno">思维链（看到→推断→比较→决定）：</p>'
             '<p class="anno">原则：</p>'
             '<p class="anno">你的选择（不同意 AI 时给出）：</p>'
@@ -140,7 +155,8 @@ def _sample_html(idx, s):
             '<p class="anno">等级（A/B/C）：</p>')
     return (f'<div class="sample"><h3>样本 {idx:03d} · {s["sample_id"]}'
             f'（{dp["side"]}侧 · 第{dp["round"]}回合 · {dp["phase"]}）</h3>'
-            f'{_board_html(dp["public_state"]["board"])}'
+            f'{villain_line}'
+            f'{_board_html(dp["public_state"]["board"], villains)}'
             f'<p class="meta">已用卡：{dp["public_state"].get("used_cards")}</p>'
             f'<ul class="hist">{hist}</ul>'
             f'<p class="meta">信念 Top5：{belief_txt}</p>'
@@ -178,6 +194,7 @@ def gen_html(samples):
             'h3{font-size:11pt;margin:10px 0 4px}'
             '.sample{border:1px solid #bbb;padding:6px 8px;margin-bottom:10px}'
             'p.bl{font-family:"Consolas",monospace;margin:0;font-size:10pt}'
+            '.evil{color:#8b0000;margin:2px 0}'
             '.meta{margin:2px 0}.ai{margin:2px 0;color:#333}'
             '.anno{margin:2px 0;border-bottom:1px dashed #ccc;padding-bottom:2px}'
             'ul.hist{margin:2px 0;padding-left:18px}'

@@ -49,6 +49,7 @@ class AgentBrain:
         self.retry_count = 0       # 校验失败重试次数
         self.parse_errors = 0      # 输出解析失败次数（JSON 格式/字段错误）
         self.call_failures = 0     # LLM 调用失败次数（未配置/网络/服务端错误）
+        self.last_reasoning = ''   # 最近一次决策的推理链（供录制器采集 SFT 数据）
         self._warned = set()       # 已告警的失败类型（避免刷屏）
 
     def good_decision(self, ctx) -> list:
@@ -62,7 +63,10 @@ class AgentBrain:
         if not get_active_villains(ctx.board):
             return None
         result = self._decide('evil', ctx)
-        return result or None
+        if result:
+            # 返回纯动作（reasoning 由 last_reasoning 单独暴露，避免污染 chosen_action）
+            return {k: v for k, v in result.items() if k != 'reasoning'}
+        return None
 
     # ------------------------------------------------------------------
     def _decide(self, side, ctx) -> dict:
@@ -81,6 +85,7 @@ class AgentBrain:
                 result = _parse_json(content)
                 ok, reason = validate(side, ctx.board, ctx.hand_cards, result)
                 if ok:
+                    self.last_reasoning = result.get('reasoning', '')
                     return result
                 # 校验失败：带错误重试一次
                 self.retry_count += 1

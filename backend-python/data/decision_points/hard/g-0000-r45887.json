@@ -4065,7 +4065,29 @@
   },
   "human_label": null,
   "outcome": null,
-  "quality": null
+  "quality": null,
+  "ai_annotation": {
+   "thought_process": [
+    "第4回合反派打九宫格×2卡放满2标（504、401），凶手必分别落在两枚标记的3×3范围内",
+    "信念Top5为302、501（并列最高）、604、205、503，302与501同时满足多刀范围约束，604为次高",
+    "对比备选：205虽在历史监视名单中出现但嫌疑权重低于604，503仅0.295",
+    "按信念优先（P0）取前三，同意AI选择；但复盘可见405同时落在R1的605十字与R2的404九宫格范围内，若重全局复盘可将405替换604"
+   ],
+   "principles_used": [
+    "region_constraint",
+    "count_deduction",
+    "replay_check"
+   ],
+   "chosen_action": null,
+   "confidence": 0.55,
+   "annotator": "ai_annotator_v1",
+   "reviewed": false,
+   "outcome": {
+    "hits": 1,
+    "result": "evil",
+    "note": "真实反派202/302/405，AI命中302；复盘路径[302,501,405]可命中2"
+   }
+  }
  },
  {
   "sample_id": "g-0000-r45887-evil-r5-08",
@@ -4538,7 +4560,29 @@
   },
   "human_label": null,
   "outcome": null,
-  "quality": null
+  "quality": null,
+  "ai_annotation": {
+   "thought_process": [
+    "本回合正派监视501、302、604，我方302被监视，可行动反派为405与202两人",
+    "手中剩3动大卡，恰好本回合行动容量为2，打大卡浪费容量=少泄漏，符合卡序调度",
+    "目标505与602均为正派低嫌疑角色（对方信念高点在302/501/604），避免误杀高嫌疑者帮对方排除",
+    "同意AI方案：两刀均在范围内（405落505十字的col4，202落602十字的col1），无同伙连带"
+   ],
+   "principles_used": [
+    "card_scheduling",
+    "anti_purge",
+    "dilution"
+   ],
+   "chosen_action": null,
+   "confidence": 0.7,
+   "annotator": "ai_annotator_v1",
+   "reviewed": false,
+   "outcome": {
+    "hits": null,
+    "result": "evil",
+    "note": "本局反派胜"
+   }
+  }
  },
  {
   "sample_id": "g-0000-r45887-good-r6-09",
@@ -5003,6 +5047,34 @@
   },
   "human_label": null,
   "outcome": null,
-  "quality": null
+  "quality": null,
+  "ai_annotation": {
+   "thought_process": [
+    "第5回合反派打3动卡只放2标（505、602），k=2<c=3说明第5回合被监视的501、302、604中恰有2名真反派",
+    "当前信念锁死405与202（1.0），第三人必在302与501之间二选一",
+    "比较302与501的历史范围命中数：302满足R1的301十字、R3的402九宫格、R4的401九宫格共3刀；501仅满足R1的301十字与R4的401九宫格共2刀",
+    "决定不同意AI的501，改为302——三人组[405,202,302]理论自洽"
+   ],
+   "principles_used": [
+    "count_deduction",
+    "exclude_killed",
+    "replay_check"
+   ],
+   "chosen_action": {
+    "targets": [
+     405,
+     202,
+     302
+    ]
+   },
+   "confidence": 0.7,
+   "annotator": "ai_annotator_v1",
+   "reviewed": false,
+   "outcome": {
+    "hits": 2,
+    "result": "evil",
+    "note": "AI选501仅中2；改选302则3/3本局正派应胜——范围内命中计数是有效判别器"
+   }
+  }
  }
 ]

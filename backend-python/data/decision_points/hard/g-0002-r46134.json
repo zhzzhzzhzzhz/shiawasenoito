@@ -4498,7 +4498,28 @@
   },
   "human_label": null,
   "outcome": null,
-  "quality": null
+  "quality": null,
+  "ai_annotation": {
+   "thought_process": [
+    "本回合正派监视605、402、502，我方502被监视，可行动反派为201与202",
+    "选择2动卡（十字+九宫格）满员打出，避免大卡浪费；目标204与301均为低嫌疑正派",
+    "两刀范围合法：202落204十字的row0，201落301九宫格范围内",
+    "同意AI方案；但对方已连续多回合咬住502，本局残局风险高"
+   ],
+   "principles_used": [
+    "card_scheduling",
+    "anti_purge"
+   ],
+   "chosen_action": null,
+   "confidence": 0.6,
+   "annotator": "ai_annotator_v1",
+   "reviewed": false,
+   "outcome": {
+    "hits": null,
+    "result": "good",
+    "note": "本局正派胜，R6正派[502,201,202]命中3/3——R5的反制未能阻止锁定"
+   }
+  }
  },
  {
   "sample_id": "g-0002-r46134-good-r6-09",

@@ -51,17 +51,26 @@ def _snapshot(side, round_num, phase, board, hand_cards, history):
     }
 
 
-def play_and_record(seed, game_index, out_dir, good_diff, evil_diff, revive403=False):
-    """跑一局 AI vs AI（RuleBrain），逐决策点导出样本。"""
+def play_and_record(seed, game_index, out_dir, good_diff, evil_diff,
+                    revive403=False, agent_side='none', agent=None):
+    """跑一局，逐决策点导出样本。agent_side ∈ {none, good, evil, both}
+    时对应侧由 LLM 智能体决策，推理链写入 ai_label.reasoning（SFT 数据）。"""
     villains = draw_villains(revive403)
     board = create_initial_board(villains, revive403)
     hand_cards = get_action_card_pool()
     history = []
     round_num = 1
     winner = None
-    good_brain = RuleBrain()
-    evil_brain = RuleBrain()
+    good_brain = agent if agent_side in ('good', 'both') else RuleBrain()
+    evil_brain = agent if agent_side in ('evil', 'both') else RuleBrain()
     samples = []
+
+    def _label(brain_name, difficulty, chosen, is_agent):
+        label = {'brain': brain_name, 'difficulty': difficulty,
+                 'chosen_action': chosen}
+        if is_agent and agent is not None:
+            label['reasoning'] = agent.last_reasoning
+        return label
 
     while round_num <= 6 and winner is None:
         if round_num >= 2:
@@ -71,10 +80,9 @@ def play_and_record(seed, game_index, out_dir, good_diff, evil_diff, revive403=F
                                   phase='placement', board=board,
                                   hand_cards=hand_cards, history_rounds=history)
             targets = good_brain.good_decision(ctx)
-            samples[-1]['ai_label'] = {
-                'brain': 'RuleBrain', 'difficulty': good_diff,
-                'chosen_action': {'targets': targets},
-            }
+            samples[-1]['ai_label'] = _label(
+                'AgentBrain' if agent_side in ('good', 'both') else 'RuleBrain',
+                good_diff, {'targets': targets}, agent_side in ('good', 'both'))
             place_surveillance(board, targets, round_num)
             history.append({'round': round_num, 'phase': 'placement',
                             'type': 'surveillance', 'targets': targets})
@@ -90,10 +98,9 @@ def play_and_record(seed, game_index, out_dir, good_diff, evil_diff, revive403=F
                                   phase='action', board=board,
                                   hand_cards=hand_cards, history_rounds=history)
             action = evil_brain.evil_decision(ctx)
-            samples[-1]['ai_label'] = {
-                'brain': 'RuleBrain', 'difficulty': evil_diff,
-                'chosen_action': action or None,
-            }
+            samples[-1]['ai_label'] = _label(
+                'AgentBrain' if agent_side in ('evil', 'both') else 'RuleBrain',
+                evil_diff, action or None, agent_side in ('evil', 'both'))
             if action:
                 card = next(c for c in hand_cards if c['index'] == action['cardIndex'])
                 card['used'] = True
@@ -149,15 +156,23 @@ def main():
     ap.add_argument('--good', default='normal', choices=['easy', 'normal', 'hard'])
     ap.add_argument('--evil', default='normal', choices=['easy', 'normal', 'hard'])
     ap.add_argument('--revive', action='store_true', help='启用 403 复活变体')
+    ap.add_argument('--agent-side', default='none',
+                    choices=['none', 'good', 'evil', 'both'],
+                    help='由 LLM 智能体决策的一侧（需配置 AGENT_LLM_*，推理链入 ai_label.reasoning）')
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
+    agent = None
+    if args.agent_side != 'none':
+        from agents.agent_brain import AgentBrain
+        agent = AgentBrain()
     t0 = time.perf_counter()
     total = 0
     for i in range(args.games):
         seed = (int(time.time() * 1000) + i) % 100000
         records = play_and_record(seed, i, args.out, args.good, args.evil,
-                                  revive403=args.revive)
+                                  revive403=args.revive, agent_side=args.agent_side,
+                                  agent=agent)
         with open(os.path.join(args.out, f'{records[0]["game_id"]}.json'), 'w',
                   encoding='utf-8') as f:
             json.dump(records, f, ensure_ascii=False, indent=1)

@@ -4080,7 +4080,28 @@
   },
   "human_label": null,
   "outcome": null,
-  "quality": null
+  "quality": null,
+  "ai_annotation": {
+   "thought_process": [
+    "第4回合反派打九宫格×2放满2标（203、502），两刀范围分别为203的3×3与502的3×3",
+    "信念Top5为202、603（并列）、501、303、504，其中603满足R1的601十字与R2的503九宫格两刀约束",
+    "比较501（0.534）与303（0.379）：303满足R2的302十字与R3的402九宫格两刀，501的范围内命中较弱",
+    "同意AI按信念取前三，但303与405（满足R1的505十字、R3的205十字两刀）复盘价值高，可作替换候选"
+   ],
+   "principles_used": [
+    "region_constraint",
+    "replay_check"
+   ],
+   "chosen_action": null,
+   "confidence": 0.5,
+   "annotator": "ai_annotator_v1",
+   "reviewed": false,
+   "outcome": {
+    "hits": 1,
+    "result": "evil",
+    "note": "真实反派303/405/603，AI仅中603；备选[603,303,405]可3/3"
+   }
+  }
  },
  {
   "sample_id": "g-0001-r46017-evil-r5-08",
@@ -4553,7 +4574,28 @@
   },
   "human_label": null,
   "outcome": null,
-  "quality": null
+  "quality": null,
+  "ai_annotation": {
+   "thought_process": [
+    "本回合正派监视603、202、501，我方603被监视，可行动反派为303与405",
+    "3动大卡在本回合容量为2，浪费容量换少泄漏，卡序正确",
+    "目标304与404均为低嫌疑正派，避免对方排除高嫌疑误判",
+    "两刀范围合法：303落304十字的row1，405落404十字的row2；范围内无可行动同伙"
+   ],
+   "principles_used": [
+    "card_scheduling",
+    "anti_purge"
+   ],
+   "chosen_action": null,
+   "confidence": 0.7,
+   "annotator": "ai_annotator_v1",
+   "reviewed": false,
+   "outcome": {
+    "hits": null,
+    "result": "evil",
+    "note": "本局反派胜；R6正派监视命中0"
+   }
+  }
  },
  {
   "sample_id": "g-0001-r46017-good-r6-09",
