@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ActionCardDef } from '../types';
 import ActionCardComp from './ActionCardComp';
 import { markerIllustration, surveillanceIllustration } from '../config/illustrations';
-import { setMarkerDragData, readMarkerDragData } from '../utils/drag';
+import type { DragPayload } from '../utils/drag';
 
 const shapeLabel: Record<string, string> = {
   '九宫格': '九宫格',
@@ -19,8 +19,8 @@ interface MarkerPanelProps {
   canPlayAction?: boolean;
   remainingShapes?: Set<'九宫格' | '十字'>;
   getRemainingCount?: (shape: '九宫格' | '十字') => number;
-  onDeathMarkerDragStart?: (shape: '九宫格' | '十字') => void;
-  onMarkerDragEnd?: () => void;
+  /** 标记左键按下开始拖拽（携带 payload） */
+  onMarkerPointerDown?: (payload: DragPayload, e: React.MouseEvent) => void;
   /** 待确认标记拖回本面板时触发（取消放置） */
   onMarkerReturn?: () => void;
   /** 已放置的本地标记拖回本面板时触发（移除该行动，传入 targetId） */
@@ -31,28 +31,27 @@ interface MarkerPanelProps {
   canPlaceSurveillance?: boolean;
 }
 
-/** 单个可拖拽标记 */
+/** 单个可拖拽标记（左键按住拖动、松开放置） */
 function DraggableMarker({
   imgSrc, label, badge, disabled, accent,
-  onDragStart, onDragEnd,
+  onPointerDown,
 }: {
   imgSrc: string;
   label: string;
   badge?: string;
   disabled?: boolean;
   accent?: string;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnd: () => void;
+  onPointerDown: (e: React.MouseEvent) => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
   return (
     <div
-      draggable={!disabled}
-      onDragStart={(e) => {
-        if (disabled) { e.preventDefault(); return; }
-        onDragStart(e);
+      onMouseDown={(e) => {
+        if (disabled) return;
+        if (e.button !== 0) return; // 仅左键
+        e.preventDefault(); // 防止选中文本/原生拖拽
+        onPointerDown(e);
       }}
-      onDragEnd={onDragEnd}
       className={`relative flex flex-col items-center justify-center w-16 h-16 rounded-xl border-2 transition-all select-none ${
         disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing hover:scale-105 hover:-translate-y-1'
       }`}
@@ -89,24 +88,13 @@ export default function MarkerPanel({
   handCards = [], selectedCard = null, onCardSelect,
   canPlayAction = false, remainingShapes = new Set(),
   getRemainingCount = () => 0,
-  onDeathMarkerDragStart, onMarkerDragEnd, onMarkerReturn, onRemoveLocalMarker,
+  onMarkerPointerDown,
   maxSurveillance = 3, surveillancePlaced = 0, canPlaceSurveillance = false,
 }: MarkerPanelProps) {
-  const canAcceptDrop = !!onMarkerReturn || !!onRemoveLocalMarker;
   return (
     <div
+      data-marker-panel="true"
       className="w-32 flex-shrink-0 flex flex-col items-center gap-4 h-full py-1 overflow-y-auto"
-      onDragOver={(e) => { if (canAcceptDrop) e.preventDefault(); }}
-      onDrop={(e) => {
-        if (!canAcceptDrop) return;
-        e.preventDefault();
-        const payload = readMarkerDragData(e);
-        if (payload?.kind === 'remove-local' && onRemoveLocalMarker) {
-          onRemoveLocalMarker(payload.targetId);
-        } else if (onMarkerReturn) {
-          onMarkerReturn();
-        }
-      }}
     >
       {role === 'evil' ? (
         <>
@@ -140,16 +128,12 @@ export default function MarkerPanel({
                       badge={`×${count}`}
                       accent={shape === '九宫格' ? '#f59e0b' : '#ec4899'}
                       disabled={count <= 0}
-                      onDragStart={(e) => {
-                        setMarkerDragData(e, { kind: 'death', shape });
-                        onDeathMarkerDragStart?.(shape);
-                      }}
-                      onDragEnd={() => onMarkerDragEnd?.()}
+                      onPointerDown={(e) => onMarkerPointerDown?.({ kind: 'death', shape }, e)}
                     />
                   );
                 })}
               </div>
-              <span className="text-[9px] text-gray-500">拖动标记到角色卡</span>
+              <span className="text-[9px] text-gray-500">按住标记拖动到角色卡</span>
             </div>
           )}
         </>
@@ -168,8 +152,7 @@ export default function MarkerPanel({
                     label={`监视${i + 1}`}
                     accent="#3b82f6"
                     disabled={!canPlaceSurveillance || used}
-                    onDragStart={(e) => setMarkerDragData(e, { kind: 'surveillance' })}
-                    onDragEnd={() => onMarkerDragEnd?.()}
+                    onPointerDown={(e) => onMarkerPointerDown?.({ kind: 'surveillance' }, e)}
                   />
                 );
               })}
@@ -177,7 +160,7 @@ export default function MarkerPanel({
             <span className="text-[9px] text-gray-500">
               已放置 {surveillancePlaced}/{maxSurveillance}
             </span>
-            <span className="text-[9px] text-gray-500">拖动标记到角色卡</span>
+            <span className="text-[9px] text-gray-500">按住标记拖动到角色卡</span>
           </div>
         </>
       )}

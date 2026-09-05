@@ -12,24 +12,27 @@ interface BoardProps {
   rangeIds?: Set<number>;
   /** 拖拽放置目标集合（null 表示当前不可拖拽放置） */
   dropTargetIds?: Set<number> | null;
-  onCharacterDrop?: (e: React.DragEvent, charId: number) => void;
+  /** 左键拖拽中悬停的角色卡（高亮提示放置目标） */
+  hoverCharId?: number | null;
   /** 待确认标记所在角色卡 id（确认前不生效） */
   pendingMarkerTarget?: number | null;
   onConfirmMarker?: () => void;
   onCancelMarker?: () => void;
-  onPendingDragStart?: (e: React.DragEvent) => void;
   /** 本地已确认放置的标记（targetId → 形状，回合提交前可反悔移除） */
   localMarkers?: Map<number, '九宫格' | '十字'>;
+  /** 本地标记插画使用的回合 */
+  localMarkerRound?: number;
   onRemoveLocalMarker?: (targetId: number) => void;
-  onLocalMarkerDragStart?: (e: React.DragEvent, targetId: number) => void;
+  /** 已放置标记左键按住开始拖拽（换目标/回面板） */
+  onLocalMarkerPointerDown?: (e: React.MouseEvent, targetId: number) => void;
 }
 
 export default function Board({
   board, viewerRole, selectedCharacters, onCharacterClick,
   interactive, dimmedIds, villainHighlightIds, rangeIds,
-  dropTargetIds = null, onCharacterDrop,
-  pendingMarkerTarget = null, onConfirmMarker, onCancelMarker, onPendingDragStart,
-  localMarkers, onRemoveLocalMarker, onLocalMarkerDragStart,
+  dropTargetIds = null, hoverCharId = null,
+  pendingMarkerTarget = null, onConfirmMarker, onCancelMarker,
+  localMarkers, localMarkerRound = 1, onRemoveLocalMarker, onLocalMarkerPointerDown,
 }: BoardProps) {
   return (
     <div className="board-grid">
@@ -41,6 +44,7 @@ export default function Board({
         const villain = villainHighlightIds ? villainHighlightIds.has(char.id) : false;
         const canDrop = dropTargetIds ? dropTargetIds.has(char.id) : false;
         const isPending = pendingMarkerTarget === char.id;
+        const hovered = hoverCharId === char.id;
         const localShape = localMarkers?.get(char.id) ?? null;
 
         return (
@@ -54,16 +58,15 @@ export default function Board({
             dimmed={dimmed}
             inRange={inRange}
             villainHighlight={villain}
-            dropTarget={canDrop}
-            onDragOver={(e) => { if (canDrop) e.preventDefault(); }}
-            onDrop={(e) => { if (canDrop) onCharacterDrop?.(e, char.id); }}
+            dropTarget={canDrop || hovered}
+            hovered={hovered}
             pendingConfirm={isPending}
             onConfirm={isPending ? onConfirmMarker : undefined}
             onCancel={isPending ? onCancelMarker : undefined}
-            onPendingDragStart={isPending ? onPendingDragStart : undefined}
             localMarkerShape={localShape}
+            localMarkerRound={localMarkerRound}
             onRemoveLocalMarker={localShape ? () => onRemoveLocalMarker?.(char.id) : undefined}
-            onLocalMarkerDragStart={localShape ? (e) => onLocalMarkerDragStart?.(e, char.id) : undefined}
+            onLocalMarkerPointerDown={localShape ? (e) => onLocalMarkerPointerDown?.(e, char.id) : undefined}
           />
         );
       })}

@@ -15,8 +15,8 @@ import RoundRecordsPanel from '../components/RoundRecordsPanel';
 import ActionCardHistory from '../components/ActionCardHistory';
 import ActionCardReveal from '../components/ActionCardReveal';
 import { getAffectedCharIds, charIdToPos } from '../utils/board';
-import { readMarkerDragData, setMarkerDragData } from '../utils/drag';
-import { randomBackground, backgroundUrl, getBackgroundFiles } from '../config/illustrations';
+import type { DragPayload } from '../utils/drag';
+import { randomBackground, backgroundUrl, getBackgroundFiles, markerIllustration, surveillanceIllustration } from '../config/illustrations';
 import type { DeathAction } from '../types';
 
 // ---- 反派行动步骤 ----
@@ -50,6 +50,17 @@ export default function GameBoardPage() {
     targetId: number;
     shape?: '九宫格' | '十字';
   } | null>(null);
+
+  // ---- 左键拖拽引擎（标记：按住拖动、松开放置/取消/换目标/回面板） ----
+  type DragState = {
+    payload: DragPayload;
+    x: number;
+    y: number;
+    hoverCharId: number | null;
+    hoverPanel: boolean;
+  };
+  const [dragState, setDragState] = useState<DragState | null>(null);
+  const dragRef = useRef<DragState | null>(null);
   const [localDeathActions, setLocalDeathActions] = useState<DeathAction[]>([]);
   // 反派开局确认：是否已查看本局三位反派角色（确认后关闭遮罩）
   const [villainConfirmed, setVillainConfirmed] = useState(false);
@@ -365,19 +376,6 @@ export default function GameBoardPage() {
     return null;
   }, [goodCanSelect, canPlayAction, evilStep, board, rangeIds]);
 
-  // ---- 角色卡拖拽放置分派：先进入待确认态，确认后才生效 ----
-  const handleCharacterDrop = useCallback((e: React.DragEvent, charId: number) => {
-    e.preventDefault();
-    const payload = readMarkerDragData(e);
-    if (!payload) return;
-    if (payload.kind === 'surveillance') {
-      setPendingMarker({ kind: 'surveillance', targetId: charId });
-    } else if (payload.kind === 'death') {
-      setPendingMarker({ kind: 'death', targetId: charId, shape: payload.shape });
-    }
-    setDragShape(null);
-  }, []);
-
   // ---- 待确认标记：确认放置（此时才真正生效） ----
   const confirmPendingMarker = useCallback(() => {
     if (!pendingMarker) return;
@@ -389,19 +387,11 @@ export default function GameBoardPage() {
     setPendingMarker(null);
   }, [pendingMarker, handleGoodCharClick, placeDeathMarker]);
 
-  // ---- 待确认标记：取消（点击 ✗ 或拖回面板） ----
+  // ---- 待确认标记：取消（点击 ✕） ----
   const cancelPendingMarker = useCallback(() => {
     setPendingMarker(null);
     setDragShape(null);
   }, []);
-
-  // ---- 待确认标记拖回面板：作为拖拽源携带原 payload ----
-  const handlePendingDragStart = useCallback((e: React.DragEvent) => {
-    if (!pendingMarker) return;
-    setMarkerDragData(e, pendingMarker.kind === 'death'
-      ? { kind: 'death', shape: pendingMarker.shape! }
-      : { kind: 'surveillance' });
-  }, [pendingMarker]);
 
   // ---- 本地已放置标记（回合提交前可反悔）：targetId → 形状 ----
   const localMarkers = useMemo(() => {
@@ -410,15 +400,86 @@ export default function GameBoardPage() {
     return m;
   }, [localDeathActions]);
 
-  // 点击移除已放置的本地标记（从待提交行动中删除）
+  // 移除已放置的本地标记（反悔）
   const removeLocalDeathAction = useCallback((targetId: number) => {
     setLocalDeathActions((prev) => prev.filter((a) => a.targetId !== targetId));
   }, []);
 
-  // 已放置标记拖回面板：携带移除 payload
-  const handleLocalMarkerDragStart = useCallback((e: React.DragEvent, targetId: number) => {
-    setMarkerDragData(e, { kind: 'remove-local', targetId });
+  // 已放置标记切换目标（拖到其他角色卡）
+  const moveLocalMarker = useCallback((targetId: number, newTargetId: number) => {
+    setLocalDeathActions((prev) => {
+      const act = prev.find((a) => a.targetId === targetId);
+      if (!act) return prev;
+      if (prev.some((a) => a.targetId === newTargetId)) return prev; // 目标已被占用
+      const pos = charIdToPos(act.villainId);
+      const ids = new Set(getAffectedCharIds(pos.row, pos.col, act.shape).filter(id => {
+        const c = board.find(ch => ch.id === id);
+        return c && c.status === 'alive';
+      }));
+      if (!ids.has(newTargetId)) return prev; // 新目标不在合法范围内
+      return prev.map((a) => (a.targetId === targetId ? { ...a, targetId: newTargetId } : a));
+    });
+  }, [board]);
+
+  // ---- 左键拖拽引擎：按住拖动、松开放置 ----
+  const startMarkerDrag = useCallback((payload: DragPayload, e: React.MouseEvent) => {
+    const st: DragState = { payload, x: e.clientX, y: e.clientY, hoverCharId: null, hoverPanel: false };
+    dragRef.current = st;
+    setDragState(st);
+    if (payload.kind === 'death') setDragShape(payload.shape);
   }, []);
+
+  // 拖拽分派所需的最新值（全局监听用 ref 避免闭包过期）
+  const dropTargetIdsRef = useRef(dropTargetIds);
+  useEffect(() => { dropTargetIdsRef.current = dropTargetIds; }, [dropTargetIds]);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const st = dragRef.current;
+      if (!st) return;
+      st.x = e.clientX;
+      st.y = e.clientY;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      st.hoverCharId = el?.closest?.('[data-char-id]')
+        ? Number((el.closest('[data-char-id]') as HTMLElement).dataset.charId)
+        : null;
+      st.hoverPanel = !!el?.closest?.('[data-marker-panel]');
+      setDragState({ ...st });
+    };
+    const onUp = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      const st = dragRef.current;
+      if (!st) return;
+      dragRef.current = null;
+      setDragState(null);
+      setDragShape(null);
+
+      if (st.payload.kind === 'remove-local') {
+        // 已放置标记拖拽：换目标 / 回面板或空白（反悔，回到回合开始时的位置）
+        if (st.hoverCharId != null && st.hoverCharId !== st.payload.targetId) {
+          moveLocalMarker(st.payload.targetId, st.hoverCharId);
+        } else if (st.hoverCharId == null) {
+          removeLocalDeathAction(st.payload.targetId);
+        }
+        // 拖回原目标卡本身 → 保持不动
+      } else {
+        // 面板标记拖出：放到可放置角色卡 → 待确认；其他位置 → 取消
+        if (st.hoverCharId != null && dropTargetIdsRef.current?.has(st.hoverCharId)) {
+          if (st.payload.kind === 'surveillance') {
+            setPendingMarker({ kind: 'surveillance', targetId: st.hoverCharId });
+          } else {
+            setPendingMarker({ kind: 'death', targetId: st.hoverCharId, shape: st.payload.shape });
+          }
+        }
+      }
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [moveLocalMarker, removeLocalDeathAction]);
 
   const allActionsDone = localDeathActions.length === maxActions && maxActions > 0;
 
@@ -531,14 +592,14 @@ export default function GameBoardPage() {
             (evilStep === 'select-villain' || evilStep === 'select-target') ? rangeIds : undefined
           }
           dropTargetIds={dropTargetIds}
-          onCharacterDrop={handleCharacterDrop}
+          hoverCharId={dragState?.hoverCharId ?? null}
           pendingMarkerTarget={pendingMarker?.targetId ?? null}
           onConfirmMarker={confirmPendingMarker}
           onCancelMarker={cancelPendingMarker}
-          onPendingDragStart={handlePendingDragStart}
           localMarkers={localMarkers}
+          localMarkerRound={round}
           onRemoveLocalMarker={removeLocalDeathAction}
-          onLocalMarkerDragStart={handleLocalMarkerDragStart}
+          onLocalMarkerPointerDown={(e, targetId) => startMarkerDrag({ kind: 'remove-local', targetId }, e)}
         />
       </motion.div>
     </div>
@@ -573,6 +634,22 @@ export default function GameBoardPage() {
         <DisconnectNotice />
         {/* 右键涂鸦层（覆盖棋盘，不挡交互） */}
         <DrawingLayer />
+
+        {/* 左键拖拽幽灵：跟随鼠标的标记图标 */}
+        {dragState && (
+          <div
+            className="fixed z-[60] pointer-events-none -translate-x-1/2 -translate-y-1/2"
+            style={{ left: dragState.x, top: dragState.y }}
+          >
+            {dragState.payload.kind === 'surveillance' ? (
+              <img src={surveillanceIllustration(round)} alt="监视" className="w-10 h-10 object-contain drop-shadow-lg" draggable={false} />
+            ) : dragState.payload.kind === 'death' ? (
+              <img src={markerIllustration(dragState.payload.shape, round)} alt={dragState.payload.shape} className="w-10 h-10 object-contain drop-shadow-lg" draggable={false} />
+            ) : (
+              <span className="text-2xl">💨</span>
+            )}
+          </div>
+        )}
 
       {/* 通知 */}
       <AnimatePresence>
@@ -697,8 +774,7 @@ export default function GameBoardPage() {
               maxSurveillance={maxSurveillance}
               surveillancePlaced={surveillanceTargets.length}
               canPlaceSurveillance={goodCanSelect}
-              onMarkerDragEnd={() => setDragShape(null)}
-              onMarkerReturn={pendingMarker ? cancelPendingMarker : undefined}
+              onMarkerPointerDown={(payload, e) => startMarkerDrag(payload, e)}
             />
             {/* 棋盘在右 */}
             {boardArea}
@@ -719,10 +795,7 @@ export default function GameBoardPage() {
               canPlayAction={canPlayAction}
               remainingShapes={remainingShapes}
               getRemainingCount={getRemainingCount}
-              onDeathMarkerDragStart={(shape) => setDragShape(shape)}
-              onMarkerDragEnd={() => setDragShape(null)}
-              onMarkerReturn={pendingMarker ? cancelPendingMarker : undefined}
-              onRemoveLocalMarker={removeLocalDeathAction}
+              onMarkerPointerDown={(payload, e) => startMarkerDrag(payload, e)}
             />
             {/* 反派视角右侧：行动卡公示历史 */}
             <ActionCardHistory records={roundRecords} />

@@ -38,30 +38,31 @@ interface CharacterCardProps {
   dimmed?: boolean;
   inRange?: boolean;
   villainHighlight?: boolean;
-  /** 是否为可拖拽放置目标 */
+  /** 是否为可拖拽放置目标 / 拖拽中悬停 */
   dropTarget?: boolean;
-  onDragOver?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent) => void;
+  /** 左键拖拽中悬停本卡（高亮） */
+  hovered?: boolean;
   /** 该卡上存在待确认标记：显示确认/取消浮层，未确认不生效 */
   pendingConfirm?: boolean;
   onConfirm?: () => void;
   onCancel?: () => void;
-  /** 待确认状态下拖回待放置区（取消）的拖拽起点回调 */
-  onPendingDragStart?: (e: React.DragEvent) => void;
   /** 本地已确认放置的标记形状（回合提交前可反悔移除） */
   localMarkerShape?: '九宫格' | '十字' | null;
+  /** 本地标记显示的回合（用于插画） */
+  localMarkerRound?: number;
   /** 点击移除本地已放置标记 */
   onRemoveLocalMarker?: () => void;
-  /** 拖动已放置标记回面板（移除）的拖拽起点回调 */
-  onLocalMarkerDragStart?: (e: React.DragEvent) => void;
+  /** 本地标记左键按住开始拖拽（换目标/回面板） */
+  onLocalMarkerPointerDown?: (e: React.MouseEvent) => void;
 }
 
 export default function CharacterCard({
   char, viewerRole, isSelected, onClick, disabled,
   dimmed = false, inRange = false, villainHighlight = false,
-  dropTarget = false, onDragOver, onDrop,
-  pendingConfirm = false, onConfirm, onCancel, onPendingDragStart,
-  localMarkerShape = null, onRemoveLocalMarker, onLocalMarkerDragStart,
+  dropTarget = false, hovered = false,
+  pendingConfirm = false, onConfirm, onCancel,
+  localMarkerShape = null, localMarkerRound = 1,
+  onRemoveLocalMarker, onLocalMarkerPointerDown,
 }: CharacterCardProps) {
   const isDead = char.status === 'dead' || char.status === 'default_dead';
   const hasActiveSurveillance = char.hasSurveillance && char.surveillanceActive;
@@ -80,8 +81,6 @@ export default function CharacterCard({
 
   // 插画加载状态：图片缺失时回退到符号占位
   const [imgFailed, setImgFailed] = useState(false);
-  // 拖拽悬停状态（用于放置目标高亮）
-  const [dragOver, setDragOver] = useState(false);
   // 死亡标记插画加载失败时回退为符号图标（保证始终有图标）
   const [deathMarkerImgFailed, setDeathMarkerImgFailed] = useState(false);
   const fallbackEmoji = (isDead || isMarked) ? '💀'
@@ -118,7 +117,7 @@ export default function CharacterCard({
   if (isDead || isMarked) className += ' dead';
   if (hasActiveSurveillance) className += ' surveillance';
   if (hasInactiveSurveillance) className += ' surveillance-inactive';
-  if (dragOver && dropTarget) className += ' drop-target';
+  if (hovered && dropTarget) className += ' drop-target';
 
   // Additional visual states for villain action
   let extraStyle: React.CSSProperties = {};
@@ -132,12 +131,13 @@ export default function CharacterCard({
   if (inRange && !isDead) {
     extraStyle = { ...extraStyle, borderColor: '#ef4444', boxShadow: '0 0 16px rgba(239, 68, 68, 0.5), inset 0 0 12px rgba(239, 68, 68, 0.15)' };
   }
-  if (dragOver && dropTarget) {
+  if (hovered && dropTarget) {
     extraStyle = { ...extraStyle, borderColor: '#22d3ee', boxShadow: '0 0 20px rgba(34, 211, 238, 0.6), inset 0 0 14px rgba(34, 211, 238, 0.2)' };
   }
 
   return (
     <motion.button
+      data-char-id={char.id}
       className={className}
       style={{ background: bgColor, borderColor, ...extraStyle }}
       onClick={() => {
@@ -152,9 +152,6 @@ export default function CharacterCard({
       whileTap={(disabled || dimmed) ? {} : { scale: 0.95 }}
       animate={isSelected || villainHighlight ? { scale: 1.05 } : { scale: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      onDragOver={(e) => { onDragOver?.(e); setDragOver(true); }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={(e) => { setDragOver(false); onDrop?.(e); }}
     >
       <span className="text-xs opacity-60 absolute top-1 left-1 z-10" style={{ color: roleColor }}>
         {char.id}
@@ -218,29 +215,27 @@ export default function CharacterCard({
         </motion.div>
       )}
 
-      {/* 本地已放置标记（回合提交前可点击/拖回移除） */}
+      {/* 本地已放置标记（回合提交前可点击移除 / 左键按住拖拽换目标或回面板） */}
       {localMarkerShape && (
-        <div className="absolute inset-0 z-[25] flex flex-col items-center justify-center pointer-events-none">
-          <span
-            className="w-9 h-9 flex items-center justify-center text-xl leading-none rounded-full"
-            style={{
-              background: `${localMarkerShape === '九宫格' ? '#f59e0b' : '#ec4899'}40`,
-              border: `2px solid ${localMarkerShape === '九宫格' ? '#f59e0b' : '#ec4899'}`,
-              boxShadow: '0 0 10px rgba(0,0,0,0.6)',
+        <div
+          className="absolute inset-0 z-[25] flex flex-col items-center justify-center pointer-events-none"
+        >
+          <img
+            src={markerIllustration(localMarkerShape, localMarkerRound)}
+            alt={localMarkerShape}
+            className="w-10 h-10 object-contain drop-shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing"
+            draggable={false}
+            title={`${localMarkerShape} · 按住拖动切换目标，拖到空白处取消`}
+            onMouseDown={(e) => {
+              if (e.button !== 0) return;
+              e.preventDefault();
+              e.stopPropagation();
+              onLocalMarkerPointerDown?.(e);
             }}
-          >
-            {localMarkerShape === '九宫格' ? '▦' : '✚'}
-          </span>
+          />
           <span className="text-[8px] mt-0.5 px-1 rounded bg-black/60 text-white/80">
-            点击移除
+            按住拖动换目标 · 点击卡移除
           </span>
-          {/* 拖回面板把手 */}
-          <span
-            draggable
-            onDragStart={(e) => { e.stopPropagation(); onLocalMarkerDragStart?.(e); }}
-            className="pointer-events-auto mt-0.5 text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-white/70 cursor-grab active:cursor-grabbing select-none"
-            title="拖回面板移除"
-          >⤺</span>
         </div>
       )}
 
@@ -267,15 +262,7 @@ export default function CharacterCard({
                 bg-rose-500/90 text-white hover:bg-rose-400 transition-colors"
             >✕</span>
           </div>
-          {/* 拖拽把手：按住可把待确认标记拖回标记面板（取消放置） */}
-          <div
-            draggable
-            onDragStart={(e) => { e.stopPropagation(); onPendingDragStart?.(e); }}
-            className="flex items-center gap-1 text-[9px] text-white/70 tracking-wider cursor-grab active:cursor-grabbing select-none"
-            title="拖回面板取消"
-          >
-            <span className="text-[10px]">⤺</span>拖回取消
-          </div>
+          <span className="text-[9px] text-white/70 tracking-wider">确认放置</span>
         </motion.div>
       )}
     </motion.button>
