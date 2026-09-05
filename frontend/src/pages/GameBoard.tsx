@@ -294,7 +294,14 @@ export default function GameBoardPage() {
   const placeDeathMarker = useCallback((charId: number, shape: '九宫格' | '十字') => {
     if (!canPlayAction || evilStep !== 'select-target') return;
     if (!selectedVillain) return;
-    if (!rangeIds.has(charId)) return; // 只能放在范围内
+    // 现场按形状计算合法范围（不依赖拖拽中的 dragShape state：
+    // 确认点击发生在拖放结束后，dragShape 已被 dragend 清空）
+    const pos = charIdToPos(selectedVillain);
+    const ids = new Set(getAffectedCharIds(pos.row, pos.col, shape).filter(id => {
+      const c = board.find(ch => ch.id === id);
+      return c && c.status === 'alive';
+    }));
+    if (!ids.has(charId)) return; // 只能放在范围内
 
     const action: DeathAction = {
       villainId: selectedVillain,
@@ -315,7 +322,7 @@ export default function GameBoardPage() {
     } else {
       setEvilStep('select-villain');
     }
-  }, [canPlayAction, evilStep, selectedVillain, rangeIds, localDeathActions, maxActions]);
+  }, [canPlayAction, evilStep, selectedVillain, board, localDeathActions, maxActions]);
 
   const submitEvilActions = () => {
     if (localDeathActions.length !== maxActions) return;
