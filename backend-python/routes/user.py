@@ -24,6 +24,10 @@ BACKGROUND_DIR = os.path.join(
 )
 BACKGROUND_EXT = ('.png', '.jpg', '.jpeg', '.webp')
 
+# 目录缺失/为空时的内置兜底清单（Docker 容器内没有 frontend/public 目录；
+# 背景图实际由客户端本地打包提供，这里只需返回完整文件名列表）
+FALLBACK_BACKGROUNDS = [f'bg_{i}.webp' for i in range(1, 8)]
+
 
 def _user_dict(row: dict) -> dict:
     """把数据库行转成 API 用户对象（snake_case → camelCase）"""
@@ -252,10 +256,13 @@ async def get_avatar(filename: str):
 
 @router.get('/backgrounds')
 async def list_backgrounds():
-    """返回房间背景图片文件名列表（扫描 public/placeholder-illust/background 目录，公开接口）"""
+    """返回房间背景图片文件名列表（扫描 public/placeholder-illust/background 目录，公开接口）
+    目录缺失（如 Docker 部署）时返回内置兜底清单，保证客户端可展示全部背景。"""
     try:
         files = os.listdir(BACKGROUND_DIR)
     except FileNotFoundError:
-        return {'code': 0, 'message': 'ok', 'data': []}
+        return {'code': 0, 'message': 'ok', 'data': FALLBACK_BACKGROUNDS}
     imgs = sorted(f for f in files if f.lower().endswith(BACKGROUND_EXT))
+    if not imgs:
+        return {'code': 0, 'message': 'ok', 'data': FALLBACK_BACKGROUNDS}
     return {'code': 0, 'message': 'ok', 'data': imgs}

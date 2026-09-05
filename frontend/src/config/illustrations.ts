@@ -59,6 +59,9 @@ export const BACKGROUND_FILES: string[] = [
   'bg_2.webp',
   'bg_3.webp',
   'bg_4.webp',
+  'bg_5.webp',
+  'bg_6.webp',
+  'bg_7.webp',
 ];
 
 /** 背景文件名 → 完整 URL */
