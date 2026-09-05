@@ -8,6 +8,7 @@ import CharacterCard from '../components/CharacterCard';
 import MarkerPanel from '../components/MarkerPanel';
 import PhaseIndicator from '../components/PhaseIndicator';
 import TurnTimer from '../components/TurnTimer';
+import NoteLayer from '../components/NoteLayer';
 import DisconnectNotice from '../components/DisconnectNotice';
 import FullscreenButton from '../components/FullscreenButton';
 import RoundRecordsPanel from '../components/RoundRecordsPanel';
@@ -533,6 +534,8 @@ export default function GameBoardPage() {
       <div className="relative z-10 w-full h-full flex flex-col">
         <FullscreenButton />
         <DisconnectNotice />
+        {/* 右键笔记层（覆盖棋盘，不挡交互） */}
+        <NoteLayer />
 
       {/* 通知 */}
       <AnimatePresence>
