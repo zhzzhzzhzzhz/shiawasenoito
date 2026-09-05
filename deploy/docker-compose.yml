@@ -53,6 +53,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret}
       JWT_EXPIRES_IN: 7d
       CORS_ORIGIN: "*"
+      RECORD_MATCH: ${RECORD_MATCH:-off}
+      TURN_TIMER: ${TURN_TIMER:-on}
+    volumes:
+      - ./dataset:/app/dataset   # 双人对局录制数据持久化（RECORD_MATCH=on 时写入）
     depends_on:
       mysql:
         condition: service_healthy
