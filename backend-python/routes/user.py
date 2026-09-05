@@ -15,7 +15,7 @@ UPLOAD_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads', 'avatars'
 )
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB
+MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5MB
 
 # 房间背景图片目录（前端 public/placeholder-illust/background）
 BACKGROUND_DIR = os.path.join(
@@ -215,7 +215,7 @@ async def upload_avatar(file: UploadFile = File(...), user: dict = Depends(get_c
 
     content = await file.read()
     if len(content) > MAX_AVATAR_SIZE:
-        return {'code': 4002, 'message': '图片大小不能超过 2MB', 'data': None}
+        return {'code': 4002, 'message': '图片大小不能超过 5MB', 'data': None}
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     saved_name = f'avatar_{user["id"]}_{uuid.uuid4().hex}.{ext}'

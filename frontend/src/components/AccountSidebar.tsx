@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import { updateProfile, changePassword, uploadAvatar, listBackgrounds } from '../api/user';
+import AvatarCropper from './AvatarCropper';
 import UserAvatar from './UserAvatar';
 import { charIllustration, backgroundUrl, getBackgroundFiles, setBackgroundFiles } from '../config/illustrations';
 import type { User } from '../types';
@@ -54,6 +55,8 @@ export default function AccountSidebar({ open, onClose }: AccountSidebarProps) {
   const [busy, setBusy] = useState(false);
   const [selectedBg, setSelectedBg] = useState<string>('random');
   const [bgList, setBgList] = useState<string[]>(getBackgroundFiles());
+  // 待裁剪的头像文件（非空时显示裁剪弹窗）
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // 应用后端返回的用户信息：仅更新 user，不触碰 token（用 store 里的 token 兜底，避免竞态误清登录态）
@@ -107,7 +110,27 @@ export default function AccountSidebar({ open, onClose }: AccountSidebarProps) {
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // 客户端校验：格式 jpg/png/webp，大小 ≤5MB
+    const okExt = /\.(jpe?g|png|webp)$/i.test(file.name);
+    if (!okExt) {
+      setMsg({ type: 'err', text: '仅支持 jpg/png/webp 格式' });
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setMsg({ type: 'err', text: '图片大小不能超过 5MB' });
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
+    setCropFile(file);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  // 裁剪完成：blob → File → 上传
+  const handleCropConfirm = async (blob: Blob) => {
+    setCropFile(null);
     setBusy(true);
+    const file = new File([blob], `avatar_${Date.now()}.webp`, { type: 'image/webp' });
     const res = await uploadAvatar(file);
     setBusy(false);
     if (res.code === 0 && user) {
@@ -116,7 +139,6 @@ export default function AccountSidebar({ open, onClose }: AccountSidebarProps) {
     } else {
       setMsg({ type: 'err', text: res.message || '上传失败' });
     }
-    if (fileRef.current) fileRef.current.value = '';
   };
 
   const togglePlayIntro = async () => {
@@ -474,6 +496,18 @@ export default function AccountSidebar({ open, onClose }: AccountSidebarProps) {
               </button>
             </div>
           </motion.div>
+
+          {/* 头像裁剪弹窗 */}
+          {cropFile && (
+            <div className="fixed inset-0 z-[70]">
+              <AvatarCropper
+                file={cropFile}
+                busy={busy}
+                onCancel={() => setCropFile(null)}
+                onConfirm={handleCropConfirm}
+              />
+            </div>
+          )}
         </>
       )}
     </AnimatePresence>
