@@ -33,6 +33,10 @@ export default function GameBoardPage() {
   // ---- 正派监视 ----
   const [surveillanceTargets, setSurveillanceTargets] = useState<number[]>([]);
 
+  // ---- 对局菜单：退出 / 投降 / 放弃 ----
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'quit' | 'surrender' | 'abandon' | null>(null);
+
   // ---- 反派行动 ----
   const [evilStep, setEvilStep] = useState<EvilStep>('select-card');
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
@@ -426,6 +430,44 @@ export default function GameBoardPage() {
     }
   };
 
+  // ---- 对局操作：退出 / 投降 / 放弃 ----
+  const ACTION_CONFIG = {
+    quit: {
+      title: '退出对局',
+      desc: '退出后本局判负，对手将获胜。',
+      confirmText: '确定退出',
+      tone: 'amber' as const,
+    },
+    surrender: {
+      title: '投降',
+      desc: '投降后本局判负，对手获胜并正常结算。',
+      confirmText: '确定投降',
+      tone: 'rose' as const,
+    },
+    abandon: {
+      title: '放弃对局',
+      desc: '放弃后本局作废，不计胜负与结算。',
+      confirmText: '确定放弃',
+      tone: 'amber' as const,
+    },
+  } as const;
+
+  const handleConfirmAction = () => {
+    if (!confirmAction) return;
+    const sock = getSocket();
+    if (!sock || !roomId) { setConfirmAction(null); return; }
+    if (confirmAction === 'quit') {
+      sock.emit('game:quit', { roomId });
+    } else if (confirmAction === 'surrender') {
+      sock.emit('game:surrender', { roomId });
+    } else {
+      sock.emit('game:abandon', { roomId });
+      navigate('/main');
+    }
+    setConfirmAction(null);
+    setMenuOpen(false);
+  };
+
   // ---- 正派选中角色（放置监视 / 附加监视） ----
   const highlightedChars = goodCanSelect ? surveillanceTargets : [];
 
@@ -507,10 +549,85 @@ export default function GameBoardPage() {
       </AnimatePresence>
 
       {/* 顶部栏 */}
-      <div className="flex-shrink-0 pt-3 px-4 flex items-center justify-center gap-3">
+      <div className="flex-shrink-0 pt-3 px-4 flex items-center justify-center gap-3 relative">
         <PhaseIndicator phase={phase} round={round} myRole={myRole} message={getPhaseMessage()} />
         <TurnTimer />
+
+        {/* 对局菜单按钮 */}
+        <button
+          onClick={() => { setMenuOpen(v => !v); setConfirmAction(null); }}
+          title="对局菜单"
+          className="absolute right-4 top-3 w-9 h-9 rounded-lg flex items-center justify-center
+            text-white/70 hover:text-white hover:bg-white/10 border border-white/10 transition-colors text-lg leading-none"
+        >☰</button>
+
+        {/* 菜单浮层 */}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+              className="absolute right-4 top-14 z-40 flex flex-col gap-1.5 w-40 p-2 rounded-xl
+                bg-[#12122e]/95 border border-white/15 backdrop-blur-sm shadow-xl"
+            >
+              {mode !== 'single' ? (
+                <>
+                  <button
+                    onClick={() => { setConfirmAction('quit'); setMenuOpen(false); }}
+                    className="py-2 px-3 rounded-lg text-sm font-bold text-amber-300/90 hover:bg-amber-500/15 border border-amber-500/25 transition-colors"
+                  >🚪 退出对局</button>
+                  <button
+                    onClick={() => { setConfirmAction('surrender'); setMenuOpen(false); }}
+                    className="py-2 px-3 rounded-lg text-sm font-bold text-rose-300/90 hover:bg-rose-500/15 border border-rose-500/25 transition-colors"
+                  >🏳 投降认输</button>
+                </>
+              ) : (
+                <button
+                  onClick={() => { setConfirmAction('abandon'); setMenuOpen(false); }}
+                  className="py-2 px-3 rounded-lg text-sm font-bold text-amber-300/90 hover:bg-amber-500/15 border border-amber-500/25 transition-colors"
+                >🚪 放弃对局</button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      {/* 对局操作二次确认弹窗 */}
+      <AnimatePresence>
+        {confirmAction && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            onClick={() => setConfirmAction(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+              className="w-[320px] p-6 rounded-2xl bg-[#16163a] border border-white/15 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-bold text-white mb-2" style={{ fontFamily: 'var(--font-title)' }}>
+                {ACTION_CONFIG[confirmAction].title}
+              </h3>
+              <p className="text-sm text-[var(--color-text-dim)] mb-5 leading-relaxed">
+                {ACTION_CONFIG[confirmAction].desc}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmAction(null)}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-bold border border-white/15 text-gray-300 hover:border-white/30 transition-colors"
+                >再想想</button>
+                <button
+                  onClick={handleConfirmAction}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-bold text-white transition-colors ${
+                    ACTION_CONFIG[confirmAction].tone === 'rose'
+                      ? 'bg-rose-600 hover:bg-rose-500'
+                      : 'bg-amber-600 hover:bg-amber-500'
+                  }`}
+                >{ACTION_CONFIG[confirmAction].confirmText}</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ===== 阶段展示缓冲倒计时 ===== */}
       <AnimatePresence>

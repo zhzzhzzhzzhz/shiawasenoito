@@ -348,7 +348,7 @@ async def _disconnect_timeout(room_id: str, player_id: int, deadline: float):
     await _handle_abandon(room_id, player_id)
 
 
-async def _handle_abandon(room_id: str, player_id: int):
+async def _handle_abandon(room_id: str, player_id: int, message: str = '对手断线超时，已判定弃赛'):
     """弃赛结算：判在线方获胜、广播结果、清理会话资源"""
     session = room_manager.get_room(room_id)
     if not session or session.status != 'playing':
@@ -365,7 +365,7 @@ async def _handle_abandon(room_id: str, player_id: int):
 
     # 通知在线方：对手弃赛，你获胜
     await sio.emit('game:opponent_left',
-                   {'message': '对手断线超时，已判定弃赛', 'abandoned': True},
+                   {'message': message, 'abandoned': True},
                    room=room_id)
     await sio.emit('game:result', {
         'winner': winner,
@@ -416,6 +416,67 @@ async def disconnect(sid):
                                    {'message': f'对手已断开连接，{DISCONNECT_WAIT_SECONDS} 秒内未重连将判定弃赛',
                                     'disconnectDeadline': int(sess.disconnect_deadline * 1000) if sess.disconnect_deadline else None},
                                    room=sess.room_id, skip_sid=sid)
+
+
+@sio.on('game:quit')
+async def game_quit(sid, data):
+    """联机对局中主动退出：等同弃赛（对方获胜，不录制训练数据）"""
+    room_id = data.get('roomId') if isinstance(data, dict) else None
+    if not room_id:
+        return
+    async with sio.session(sid) as session:
+        user = session.get('user', {})
+        player_id = user.get('id')
+    sess = room_manager.get_room(room_id)
+    if not sess or sess.status != 'playing' or sess.mode == 'single':
+        return
+    if player_id not in (sess.good_player_id, sess.evil_player_id):
+        return
+    await _handle_abandon(room_id, player_id, message='对手已退出对局，你获胜')
+
+
+@sio.on('game:surrender')
+async def game_surrender(sid, data):
+    """联机对局中主动投降：对方获胜，正常结算并录制训练数据"""
+    room_id = data.get('roomId') if isinstance(data, dict) else None
+    if not room_id:
+        return
+    async with sio.session(sid) as session:
+        user = session.get('user', {})
+        player_id = user.get('id')
+    sess = room_manager.get_room(room_id)
+    if not sess or sess.status != 'playing' or sess.mode == 'single':
+        return
+    if player_id not in (sess.good_player_id, sess.evil_player_id):
+        return
+    winner = 'evil' if player_id == sess.good_player_id else 'good'
+    sess.status = 'finished'
+    sess.winner = winner
+    stop_turn(room_id)
+    cancel_disconnect_countdown(room_id)
+    _maybe_record(sess)
+    await sio.emit('game:result', {
+        'winner': winner,
+        'detail': sess.get_record_detail(),
+    }, room=room_id)
+    room_manager.remove_room(room_id)
+    print(f'[Socket] 投降结算: room={room_id} 投降方={player_id} 胜者={winner}')
+
+
+@sio.on('game:abandon')
+async def game_abandon(sid, data):
+    """单机对局放弃：本局作废，不结算，直接清理房间"""
+    room_id = data.get('roomId') if isinstance(data, dict) else None
+    if not room_id:
+        return
+    sess = room_manager.get_room(room_id)
+    if not sess or sess.mode != 'single':
+        return
+    if sess.status == 'finished':
+        return
+    stop_turn(room_id)
+    room_manager.remove_room(room_id)
+    print(f'[Socket] 单机放弃: room={room_id}')
 
 
 @sio.on('game:single_start')
