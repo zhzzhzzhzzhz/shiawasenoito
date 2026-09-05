@@ -412,7 +412,9 @@ class GameSession:
     def get_record_detail(self) -> dict:
         return {
             'villains': self.villains,
-            'history': self.history_rounds,
+            # 复盘阶段身份已公开：用不脱敏的聚合回合记录（含 villainId），
+            # 正派回放时也能看到死亡标记的真实行动者
+            'history': self.get_round_records(None),
             'finalBoard': [{'id': c['id'], 'role': c['role'], 'status': c['status']}
                            for c in self.board],
             'winner': self.winner,

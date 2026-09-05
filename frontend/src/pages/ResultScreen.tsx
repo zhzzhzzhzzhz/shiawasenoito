@@ -158,7 +158,7 @@ function RoundSlide({ round, record, deadIds, illustVersion }: {
 
 export default function ResultScreen() {
   const navigate = useNavigate();
-  const roundRecords = useGameStore((s) => s.roundRecords);
+  const storeRoundRecords = useGameStore((s) => s.roundRecords);
   const resultDetail = useGameStore((s) => s.resultDetail);
   const storeVillains = useGameStore((s) => s.villains);
   const winner = useGameStore((s) => s.winner);
@@ -167,6 +167,13 @@ export default function ResultScreen() {
   const illustVersion = useGameStore((s) => s.user?.illustVersion ?? 'v1');
 
   const [pageIndex, setPageIndex] = useState(0);
+
+  // 复盘数据源：优先用 game:result 下发的 detail.history（不脱敏，含真实 villainId，
+  // 复盘时反派身份已公开）；缺失时回退 store 的回合记录（可能已脱敏）
+  const roundRecords =
+    resultDetail?.history && resultDetail.history.length > 0
+      ? resultDetail.history
+      : storeRoundRecords;
 
   // 复盘张：每个有内容的回合成一张，死亡角色按回合累计；最后 +1 张结果
   const slides = useMemo<Slide[]>(() => {

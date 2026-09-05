@@ -144,6 +144,7 @@ export interface RoundRecord {
 // ==================== 结算复盘详情（game:result.detail，对双方可见） ====================
 export interface ResultDetail {
   villains: number[];              // 三位反派 ID（对双方可见）
+  history: RoundRecord[];          // 不脱敏的聚合回合记录（复盘公开身份，含 villainId）
   finalBoard: Array<{ id: number; role: string; status: string }>;
   winner: 'good' | 'evil' | null;
   totalRounds: number;
