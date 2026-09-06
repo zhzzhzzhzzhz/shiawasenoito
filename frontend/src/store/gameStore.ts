@@ -179,7 +179,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setNotification: (n) => set({ notification: n }),
   reset: () => {
     clearActiveGame();
-    set({ ...initialState, socket: get().socket, isConnected: get().isConnected });
+    // 只清对局相关状态，保留登录态（user/token）与连接状态
+    const { user, token, socket, isConnected } = get();
+    set({ ...initialState, socket, isConnected, user, token });
   },
 }));
 

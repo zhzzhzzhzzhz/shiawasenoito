@@ -41,6 +41,14 @@ function createWindow() {
     },
   });
 
+  // 窗口最大化按钮统一为全屏（与游戏内右上角全屏按钮行为一致）
+  win.on('maximize', () => {
+    if (!win.isFullScreen()) {
+      win.unmaximize();
+      win.setFullScreen(true);
+    }
+  });
+
   // 加载前端构建产物（desktop/dist，打包前由 frontend/dist 复制而来）
   win.loadFile(path.join(__dirname, 'dist', 'index.html'));
 }
