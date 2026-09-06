@@ -9,7 +9,10 @@ interface BoardProps {
   interactive: boolean;
   dimmedIds?: Set<number>;
   villainHighlightIds?: Set<number>;
-  rangeIds?: Set<number>;
+  /** 范围分色（拖拽中）：charId → 反派范围色 */
+  rangeColors?: Map<number, string>;
+  /** 范围重叠的卡（多个反派范围同时覆盖，需手动选行动者） */
+  rangeOverlapIds?: Set<number>;
   /** 拖拽放置目标集合（null 表示当前不可拖拽放置） */
   dropTargetIds?: Set<number> | null;
   /** 左键拖拽中悬停的角色卡（高亮提示放置目标） */
@@ -25,7 +28,8 @@ interface BoardProps {
 
 export default function Board({
   board, viewerRole, selectedCharacters, onCharacterClick,
-  interactive, dimmedIds, villainHighlightIds, rangeIds,
+  interactive, dimmedIds, villainHighlightIds,
+  rangeColors, rangeOverlapIds,
   dropTargetIds = null, hoverCharId = null,
   localMarkers, localMarkerRound = 1, onRemoveLocalMarker, onLocalMarkerPointerDown,
 }: BoardProps) {
@@ -35,8 +39,9 @@ export default function Board({
         const isDead = char.status === 'dead' || char.status === 'default_dead';
         const canInteract = interactive && !isDead;
         const dimmed = dimmedIds ? dimmedIds.has(char.id) : false;
-        const inRange = rangeIds ? rangeIds.has(char.id) : false;
         const villain = villainHighlightIds ? villainHighlightIds.has(char.id) : false;
+        const rangeColor = rangeColors?.get(char.id) ?? null;
+        const rangeOverlap = rangeOverlapIds?.has(char.id) ?? false;
         const canDrop = dropTargetIds ? dropTargetIds.has(char.id) : false;
         const hovered = hoverCharId === char.id;
         const localMarker = localMarkers?.get(char.id) ?? null;
@@ -50,8 +55,9 @@ export default function Board({
             onClick={() => canInteract && onCharacterClick(char.id)}
             disabled={!canInteract}
             dimmed={localMarker ? false : dimmed}
-            inRange={inRange}
             villainHighlight={villain}
+            rangeColor={rangeColor}
+            rangeOverlap={rangeOverlap}
             dropTarget={canDrop || hovered}
             hovered={hovered}
             localMarker={localMarker}

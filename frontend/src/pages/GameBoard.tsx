@@ -19,8 +19,8 @@ import type { DragPayload } from '../utils/drag';
 import { randomBackground, backgroundUrl, getBackgroundFiles, markerIllustration, surveillanceIllustration } from '../config/illustrations';
 import type { DeathAction } from '../types';
 
-// ---- 反派行动步骤 ----
-type EvilStep = 'select-card' | 'select-villain' | 'select-target';
+// 反派范围高亮分色（按可行动反派顺序取色，重叠处另有提示）
+const RANGE_COLORS = ['#f59e0b', '#ec4899', '#22d3ee'];
 
 export default function GameBoardPage() {
   const navigate = useNavigate();
@@ -39,9 +39,13 @@ export default function GameBoardPage() {
   const [confirmAction, setConfirmAction] = useState<'quit' | 'surrender' | 'abandon' | null>(null);
 
   // ---- 反派行动 ----
-  const [evilStep, setEvilStep] = useState<EvilStep>('select-card');
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
-  const [selectedVillain, setSelectedVillain] = useState<number | null>(null);
+  // 重叠归属选择：松手目标落在多个反派范围时，玩家点击候选反派卡选定行动者
+  const [pendingVillainChoice, setPendingVillainChoice] = useState<{
+    targetId: number;
+    shape: '九宫格' | '十字';
+    candidates: number[];
+  } | null>(null);
   // 拖拽中的死亡标记形状（用于实时范围预览；形状由拖动的标记决定）
   const [dragShape, setDragShape] = useState<'九宫格' | '十字' | null>(null);
   // ---- 左键拖拽引擎（标记：按住拖动、松开放置/取消/换目标/回面板） ----
@@ -122,18 +126,24 @@ export default function GameBoardPage() {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // ---- 可行动的反派数量 ----
+  // ---- 可行动的反派数量（对齐后端：存活、未被监视、未被死亡标记） ----
   const activeVillains = useMemo(() =>
     board.filter(c =>
       c.role === 'evil' && c.status === 'alive' &&
+      !c.hasDeathMarker &&
       !(c.hasSurveillance && c.surveillanceActive)
     ), [board]
   );
 
-  // ---- 已用反派 ID ----
+  // ---- 已用反派 ID（每反派每回合至多一个标记） ----
   const usedVillainIds = useMemo(() =>
     new Set(localDeathActions.map(a => a.villainId)), [localDeathActions]
   );
+
+  // ---- 反派当前是否可行动（阶段/身份/倒计时/模式） ----
+  const canPlayAction = phase === 'action' && myRole === 'evil' &&
+    displayCountdown <= 0 &&
+    (mode === 'single' || mode === 'match' || mode === 'invite');
 
   // ---- 当前选卡的最大行动数 ----
   const maxActions = useMemo(() => {
@@ -173,45 +183,52 @@ export default function GameBoardPage() {
     return set;
   }, [cardShapeCounts, usedShapeCounts]);
 
-  // ---- 范围预览（使用玩家当前拖动的形状） ----
-  const rangeIds = useMemo(() => {
-    if (!selectedVillain || !dragShape) return new Set<number>();
-    const pos = charIdToPos(selectedVillain);
-    const ids = getAffectedCharIds(pos.row, pos.col, dragShape);
-    return new Set(ids.filter(id => {
-      const c = board.find(ch => ch.id === id);
-      return c && c.status === 'alive';
-    }));
-  }, [selectedVillain, dragShape, board]);
+  // ---- 拖拽中的聚合范围：每个可行动反派 → 该形状的合法目标集 ----
+  const allVillainRanges = useMemo(() => {
+    const m = new Map<number, Set<number>>();
+    if (!dragShape || !canPlayAction) return m;
+    const avail = activeVillains.filter(v => !usedVillainIds.has(v.id));
+    for (const v of avail) {
+      const pos = charIdToPos(v.id);
+      const ids = new Set(getAffectedCharIds(pos.row, pos.col, dragShape).filter(id => {
+        const c = board.find(ch => ch.id === id);
+        return c && c.status === 'alive' &&
+          !localDeathActions.some(a => a.targetId === id);
+      }));
+      m.set(v.id, ids);
+    }
+    return m;
+  }, [dragShape, canPlayAction, activeVillains, usedVillainIds, board, localDeathActions]);
 
-  // ---- 反派高亮 ID（未用且存活的） ----
+  // ---- 反派高亮（重叠选择时：候选反派金色高亮供点击选定） ----
   const villainHighlightIds = useMemo(() => {
-    if (evilStep !== 'select-villain') return new Set<number>();
-    return new Set(activeVillains.filter(v => !usedVillainIds.has(v.id)).map(v => v.id));
-  }, [evilStep, activeVillains, usedVillainIds]);
+    if (!pendingVillainChoice) return new Set<number>();
+    return new Set(pendingVillainChoice.candidates);
+  }, [pendingVillainChoice]);
 
   // ---- 羽化 ID ----
-  // select-card: 无羽化
-  // select-villain: 非高亮反派角色羽化渐隐（重新启用羽化）
-  // select-target: 拖动中显示范围，范围外羽化；未拖动时不羽化
+  // 拖拽中：范围并集外的卡羽化；选择行动者时：非候选卡羽化
   const dimmedIds = useMemo(() => {
-    if (evilStep === 'select-card') return new Set<number>();
-    if (evilStep === 'select-target') {
-      if (!dragShape) return new Set<number>();
+    if (pendingVillainChoice) {
       const result = new Set<number>();
       for (const c of board) {
         if (c.status === 'dead' || c.status === 'default_dead') continue;
-        if (!rangeIds.has(c.id)) result.add(c.id);
+        if (!pendingVillainChoice.candidates.includes(c.id)) result.add(c.id);
       }
       return result;
     }
-    const result = new Set<number>();
-    for (const c of board) {
-      if (c.status === 'dead' || c.status === 'default_dead') continue;
-      if (!villainHighlightIds.has(c.id)) result.add(c.id);
+    if (dragShape) {
+      const union = new Set<number>();
+      for (const ids of allVillainRanges.values()) for (const id of ids) union.add(id);
+      const result = new Set<number>();
+      for (const c of board) {
+        if (c.status === 'dead' || c.status === 'default_dead') continue;
+        if (!union.has(c.id)) result.add(c.id);
+      }
+      return result;
     }
-    return result;
-  }, [evilStep, board, villainHighlightIds, rangeIds, dragShape]);
+    return new Set<number>();
+  }, [pendingVillainChoice, board, dragShape, allVillainRanges]);
 
   // ==================== 正派操作 ====================
 
@@ -249,10 +266,6 @@ export default function GameBoardPage() {
 
   // ==================== 反派操作 ====================
 
-  const canPlayAction = phase === 'action' && myRole === 'evil' &&
-    displayCountdown <= 0 &&
-    (mode === 'single' || mode === 'match' || mode === 'invite');
-
   // ---- 反派是否无可行动（无可用卡 / 无可行动反派 / 无未标记目标）----
   const evilCannotAct = useMemo(() => {
     if (!canPlayAction) return false;
@@ -270,8 +283,7 @@ export default function GameBoardPage() {
     }
     setSelectedCard(null);
     setLocalDeathActions([]);
-    setEvilStep('select-card');
-    setSelectedVillain(null);
+    setPendingVillainChoice(null);
     setDragShape(null);
   };
 
@@ -280,53 +292,38 @@ export default function GameBoardPage() {
     const card = handCards.find(c => c.index === index);
     if (!card || card.used) return;
     setSelectedCard(index);
-    setEvilStep('select-villain');
-    setSelectedVillain(null);
+    setPendingVillainChoice(null);
     setDragShape(null);
     setLocalDeathActions([]);
   };
 
-  const handleVillainSelect = (charId: number) => {
-    if (!canPlayAction || evilStep !== 'select-villain') return;
-    if (!villainHighlightIds.has(charId)) return;
-    setSelectedVillain(charId);
-    setDragShape(null);
-    setEvilStep('select-target');
+  // 重叠归属选择：点击候选反派卡选定行动者
+  const handleChooseVillain = (villainId: number) => {
+    if (!pendingVillainChoice) return;
+    if (!pendingVillainChoice.candidates.includes(villainId)) return;
+    placeDeathMarker(villainId, pendingVillainChoice.targetId, pendingVillainChoice.shape);
+    setPendingVillainChoice(null);
   };
 
-  // 拖动死亡标记放置：形状由被拖动的标记决定
-  const placeDeathMarker = useCallback((charId: number, shape: '九宫格' | '十字') => {
-    if (!canPlayAction || evilStep !== 'select-target') return;
-    if (!selectedVillain) return;
-    // 现场按形状计算合法范围（不依赖拖拽中的 dragShape state：
-    // 确认点击发生在拖放结束后，dragShape 已被 dragend 清空）
-    const pos = charIdToPos(selectedVillain);
+  // 放置死亡标记（行动者已确定）：现场按形状计算合法范围校验
+  const placeDeathMarker = useCallback((villainId: number, charId: number, shape: '九宫格' | '十字') => {
+    if (!canPlayAction) return;
+    const pos = charIdToPos(villainId);
     const ids = new Set(getAffectedCharIds(pos.row, pos.col, shape).filter(id => {
       const c = board.find(ch => ch.id === id);
-      return c && c.status === 'alive';
+      return c && c.status === 'alive' &&
+        !localDeathActions.some(a => a.targetId === id);
     }));
-    if (!ids.has(charId)) return; // 只能放在范围内
+    if (!ids.has(charId)) return; // 只能放在该反派范围内
 
     const action: DeathAction = {
-      villainId: selectedVillain,
+      villainId,
       targetId: charId,
       shape,
     };
-    const newActions = [...localDeathActions, action];
-    setLocalDeathActions(newActions);
-
-    // 重置到选反派步骤，准备下一个行动
-    setSelectedVillain(null);
+    setLocalDeathActions([...localDeathActions, action]);
     setDragShape(null);
-
-    if (newActions.length >= maxActions) {
-      // 全部完成，回到选卡界面等结束回合
-      // 注意：不能清空 selectedCard，提交「结束回合」时还需要 cardIndex
-      setEvilStep('select-card');
-    } else {
-      setEvilStep('select-villain');
-    }
-  }, [canPlayAction, evilStep, selectedVillain, board, localDeathActions, maxActions]);
+  }, [canPlayAction, board, localDeathActions]);
 
   const submitEvilActions = () => {
     if (localDeathActions.length !== maxActions) return;
@@ -338,22 +335,15 @@ export default function GameBoardPage() {
     }
     setSelectedCard(null);
     setLocalDeathActions([]);
-    setEvilStep('select-card');
-    setSelectedVillain(null);
+    setPendingVillainChoice(null);
     setDragShape(null);
   };
 
   const cancelEvilAction = () => {
     setDragShape(null);
-    if (evilStep === 'select-target') {
-      setEvilStep('select-villain');
-      setSelectedVillain(null);
-    } else if (evilStep === 'select-villain') {
-      setEvilStep('select-card');
-      setSelectedCard(null);
-      setSelectedVillain(null);
-      setLocalDeathActions([]);
-    }
+    setPendingVillainChoice(null);
+    setSelectedCard(null);
+    setLocalDeathActions([]);
   };
 
   // ---- 拖拽放置目标集合 ----
@@ -362,11 +352,14 @@ export default function GameBoardPage() {
       // 正派：所有存活角色（403 复活变体下 403 状态为 alive，自然可被监视）
       return new Set(board.filter(c => c.status === 'alive').map(c => c.id));
     }
-    if (canPlayAction && evilStep === 'select-target') {
-      return rangeIds;
+    if (canPlayAction && dragShape) {
+      // 反派：所有可行动反派范围的并集（拖拽中）
+      const union = new Set<number>();
+      for (const ids of allVillainRanges.values()) for (const id of ids) union.add(id);
+      return union;
     }
     return null;
-  }, [goodCanSelect, canPlayAction, evilStep, board, rangeIds]);
+  }, [goodCanSelect, canPlayAction, dragShape, board, allVillainRanges]);
 
   // ---- 本地已放置标记（回合提交前可反悔）：targetId → 标记信息 ----
   const localMarkers = useMemo(() => {
@@ -416,6 +409,7 @@ export default function GameBoardPage() {
 
   // ---- 左键拖拽引擎：按住拖动、松开放置 ----
   const startMarkerDrag = useCallback((payload: DragPayload, e: React.MouseEvent) => {
+    setPendingVillainChoice(null); // 开始新拖拽时放弃重叠选择
     const st: DragState = { payload, x: e.clientX, y: e.clientY, hoverCharId: null, hoverPanel: false };
     dragRef.current = st;
     setDragState(st);
@@ -425,6 +419,12 @@ export default function GameBoardPage() {
   // 拖拽分派所需的最新值（全局监听用 ref 避免闭包过期）
   const dropTargetIdsRef = useRef(dropTargetIds);
   useEffect(() => { dropTargetIdsRef.current = dropTargetIds; }, [dropTargetIds]);
+  const allVillainRangesRef = useRef(allVillainRanges);
+  useEffect(() => { allVillainRangesRef.current = allVillainRanges; }, [allVillainRanges]);
+  const activeVillainsRef = useRef(activeVillains);
+  useEffect(() => { activeVillainsRef.current = activeVillains; }, [activeVillains]);
+  const usedVillainIdsRef = useRef(usedVillainIds);
+  useEffect(() => { usedVillainIdsRef.current = usedVillainIds; }, [usedVillainIds]);
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -455,14 +455,22 @@ export default function GameBoardPage() {
           removeLocalMarker(st.payload.targetId);
         }
         // 拖回原目标卡本身 → 保持不动
-      } else {
-        // 面板标记拖出：放到可放置角色卡 → 直接生效；其他位置 → 取消
+      } else if (st.payload.kind === 'surveillance') {
+        // 正派监视：放到可放置角色卡 → 直接生效
         if (st.hoverCharId != null && dropTargetIdsRef.current?.has(st.hoverCharId)) {
-          if (st.payload.kind === 'surveillance') {
-            handleGoodCharClick(st.hoverCharId);
-          } else {
-            placeDeathMarker(st.hoverCharId, st.payload.shape);
-          }
+          handleGoodCharClick(st.hoverCharId);
+        }
+      } else {
+        // 反派死亡标记：放到范围内 → 按归属自动分派（唯一直接放，重叠弹选择）
+        const targetId = st.hoverCharId;
+        if (targetId == null || !dropTargetIdsRef.current?.has(targetId)) return;
+        const ranges = allVillainRangesRef.current;
+        const avail = activeVillainsRef.current.filter(v => !usedVillainIdsRef.current.has(v.id));
+        const candidates = avail.filter(v => ranges.get(v.id)?.has(targetId)).map(v => v.id);
+        if (candidates.length === 1) {
+          placeDeathMarker(candidates[0], targetId, st.payload.shape);
+        } else if (candidates.length > 1) {
+          setPendingVillainChoice({ targetId, shape: st.payload.shape, candidates });
         }
       }
     };
@@ -487,11 +495,9 @@ export default function GameBoardPage() {
     if (phase === 'placement' && myRole === 'evil') return '等待正派放置监视标记...';
     if (phase === 'reveal') return '公示本回合结果，结算中...';
     if (canPlayAction) {
-      if (evilStep === 'select-card') {
-        return evilCannotAct ? '无可用行动，请跳过本回合' : '请选择1张行动卡';
-      }
-      if (evilStep === 'select-villain') return '选择行动的反派角色';
-      if (evilStep === 'select-target') return '拖动标记到角色卡';
+      if (pendingVillainChoice) return '标记范围重叠，点击候选反派选定行动者';
+      if (dragShape) return '拖动标记到高亮范围内';
+      return evilCannotAct ? '无可用行动，请跳过本回合' : '请选择1张行动卡';
     }
     if (phase === 'action' && myRole === 'good') return '等待反派行动...';
     return '';
@@ -557,10 +563,34 @@ export default function GameBoardPage() {
     setMenuOpen(false);
   };
 
-  // ---- 角色卡交互：反派仅在 select-villain 阶段点击选反派；标记放置统一走拖拽 ----
-  const boardInteractive = goodCanSelect ||
-    (canPlayAction && (evilStep === 'select-villain' || evilStep === 'select-target'));
-  const boardOnClick = canPlayAction && evilStep === 'select-villain' ? handleVillainSelect : () => {};
+  // ---- 角色卡交互：重叠选择时点击候选反派选定；其余状态点击无操作 ----
+  const boardInteractive = goodCanSelect || !!pendingVillainChoice;
+  const boardOnClick = pendingVillainChoice ? handleChooseVillain : () => {};
+
+  // ---- 范围分色：每张卡归属的反派范围色（重叠处标记提示） ----
+  const rangeColorByChar = useMemo(() => {
+    const m = new Map<number, string>();
+    if (!dragShape || !canPlayAction || pendingVillainChoice) return m;
+    let idx = 0;
+    for (const v of activeVillains) {
+      if (usedVillainIds.has(v.id)) continue;
+      const ids = allVillainRanges.get(v.id);
+      if (!ids) continue;
+      const color = RANGE_COLORS[idx % RANGE_COLORS.length];
+      idx += 1;
+      for (const id of ids) m.set(id, color);
+    }
+    return m;
+  }, [dragShape, canPlayAction, pendingVillainChoice, activeVillains, usedVillainIds, allVillainRanges]);
+
+  // ---- 范围重叠的卡（多个反派范围同时覆盖） ----
+  const rangeOverlapIds = useMemo(() => {
+    const count = new Map<number, number>();
+    for (const ids of allVillainRanges.values()) {
+      for (const id of ids) count.set(id, (count.get(id) || 0) + 1);
+    }
+    return new Set([...count.entries()].filter(([, n]) => n > 1).map(([id]) => id));
+  }, [allVillainRanges]);
 
   const boardArea = (
     <div className="flex-1 flex overflow-y-auto min-w-[360px]">
@@ -578,9 +608,8 @@ export default function GameBoardPage() {
           interactive={boardInteractive}
           dimmedIds={dimmedIds}
           villainHighlightIds={villainHighlightIds}
-          rangeIds={
-            (evilStep === 'select-villain' || evilStep === 'select-target') ? rangeIds : undefined
-          }
+          rangeColors={rangeColorByChar}
+          rangeOverlapIds={rangeOverlapIds}
           dropTargetIds={dropTargetIds}
           hoverCharId={dragState?.hoverCharId ?? null}
           localMarkers={localMarkers}
@@ -819,7 +848,7 @@ export default function GameBoardPage() {
         {canPlayAction && (
           <>
             {/* 无可行动时：跳过行动 */}
-            {evilCannotAct && evilStep === 'select-card' && (
+            {evilCannotAct && !selectedCard && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
                 onClick={skipEvilAction}
@@ -841,7 +870,7 @@ export default function GameBoardPage() {
             )}
 
             {/* 取消当前选择 */}
-            {evilStep !== 'select-card' && (
+            {(selectedCard !== null || pendingVillainChoice) && (
               <motion.button
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 className="btn-secondary"

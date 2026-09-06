@@ -41,8 +41,11 @@ interface CharacterCardProps {
   onClick: () => void;
   disabled: boolean;
   dimmed?: boolean;
-  inRange?: boolean;
   villainHighlight?: boolean;
+  /** 拖拽中的范围色（所属反派的分色） */
+  rangeColor?: string | null;
+  /** 范围重叠卡（多反派覆盖，松手后需手动选行动者） */
+  rangeOverlap?: boolean;
   /** 是否为可拖拽放置目标 / 拖拽中悬停 */
   dropTarget?: boolean;
   /** 左键拖拽中悬停本卡（高亮） */
@@ -59,7 +62,8 @@ interface CharacterCardProps {
 
 export default function CharacterCard({
   char, viewerRole, isSelected, onClick, disabled,
-  dimmed = false, inRange = false, villainHighlight = false,
+  dimmed = false, villainHighlight = false,
+  rangeColor = null, rangeOverlap = false,
   dropTarget = false, hovered = false,
   localMarker = null, localMarkerRound = 1,
   onRemoveLocalMarker, onLocalMarkerPointerDown,
@@ -128,8 +132,14 @@ export default function CharacterCard({
     extraStyle = { boxShadow: '0 0 20px rgba(245, 158, 11, 0.7), 0 0 40px rgba(245, 158, 11, 0.3)' };
     borderColor = '#f59e0b';
   }
-  if (inRange && !isDead) {
-    extraStyle = { ...extraStyle, borderColor: '#ef4444', boxShadow: '0 0 16px rgba(239, 68, 68, 0.5), inset 0 0 12px rgba(239, 68, 68, 0.15)' };
+  if (rangeColor && !isDead) {
+    extraStyle = {
+      ...extraStyle,
+      borderColor: rangeColor,
+      boxShadow: rangeOverlap
+        ? `0 0 14px ${rangeColor}, inset 0 0 10px ${rangeColor}55, 0 0 0 2px #ffffff88`
+        : `0 0 14px ${rangeColor}, inset 0 0 10px ${rangeColor}55`,
+    };
   }
   if (hovered && dropTarget) {
     extraStyle = { ...extraStyle, borderColor: '#22d3ee', boxShadow: '0 0 20px rgba(34, 211, 238, 0.6), inset 0 0 14px rgba(34, 211, 238, 0.2)' };
