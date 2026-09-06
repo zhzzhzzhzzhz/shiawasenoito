@@ -600,8 +600,10 @@ export default function GameBoardPage() {
     if (!sock || !roomId) { setConfirmAction(null); return; }
     if (confirmAction === 'quit') {
       sock.emit('game:quit', { roomId });
+      startActionTimeout();
     } else if (confirmAction === 'surrender') {
       sock.emit('game:surrender', { roomId });
+      startActionTimeout();
     } else {
       sock.emit('game:abandon', { roomId });
       // 放弃：后端不发 game:result，需主动清除对局状态（含恢复记录），与投降/退出对齐
@@ -611,6 +613,21 @@ export default function GameBoardPage() {
     setConfirmAction(null);
     setMenuOpen(false);
   };
+
+  // 投降/退出保险：5 秒内未收到结算（gameStatus 未变 finished）→ 提示服务器可能未更新
+  const actionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startActionTimeout = () => {
+    if (actionTimerRef.current) clearTimeout(actionTimerRef.current);
+    actionTimerRef.current = setTimeout(() => {
+      actionTimerRef.current = null;
+      if (useGameStore.getState().gameStatus !== 'finished') {
+        setNotification({ type: 'error', message: '服务器无响应：请确认服务端已更新后重试' });
+      }
+    }, 5000);
+  };
+  useEffect(() => () => {
+    if (actionTimerRef.current) clearTimeout(actionTimerRef.current);
+  }, []);
 
   // ---- 角色卡交互：重叠选择时点击候选反派选定；拖拽中卡片保持可命中 ----
   const boardInteractive = goodCanSelect || !!pendingVillainChoice || !!dragState;

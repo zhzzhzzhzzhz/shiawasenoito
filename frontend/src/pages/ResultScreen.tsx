@@ -202,7 +202,8 @@ export default function ResultScreen() {
     navigate(path);
   };
 
-  const current = slides[pageIndex];
+  // 钳制索引：reset 清空回合记录导致 slides 缩短时，current 也不会越界
+  const current = slides[Math.min(pageIndex, slides.length - 1)];
   const total = slides.length;
   const isLast = pageIndex === total - 1;
 
