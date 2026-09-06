@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { User } from '../types';
 import { charIllustration } from '../config/illustrations';
+import { API_BASE } from '../config/env';
 
 /** 根据用户头像设置返回图片 src；无头像返回 null（走默认占位） */
 export function avatarSrc(user: User | null): string | null {
@@ -10,7 +11,9 @@ export function avatarSrc(user: User | null): string | null {
     if (!Number.isNaN(id)) return charIllustration(id);
   }
   if (user.avatarType === 'upload' && user.avatarValue) {
-    return `/api/user/avatar/${user.avatarValue}`;
+    // 桌面端（file:// 协议）相对路径会被解析成本地文件，必须拼完整后端地址；
+    // Web 部署时 API_BASE=/api，行为与之前一致
+    return `${API_BASE}/user/avatar/${user.avatarValue}`;
   }
   return null;
 }
