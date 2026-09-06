@@ -450,6 +450,7 @@ async def game_surrender(sid, data):
     if player_id not in (sess.good_player_id, sess.evil_player_id):
         return
     winner = 'evil' if player_id == sess.good_player_id else 'good'
+    sess.ended_by = 'surrender'   # 认输局标记：录制数据含此字段，审计时豁免胜负一致性检查
     sess.status = 'finished'
     sess.winner = winner
     stop_turn(room_id)

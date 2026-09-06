@@ -43,6 +43,7 @@ class GameSession:
         self.good_player_ready = False
         self.evil_player_ready = False
         self.reveal_data = None  # 公示数据（行动卡 + 死亡标记）
+        self.invite_consumed = False  # 邀请码是否已销毁（房主进入房间后置 True，拒绝再加入）
 
         # 回合倒计时（双人模式）
         self.turn_deadline = None   # 回合截止时间戳（epoch 秒）
@@ -57,6 +58,7 @@ class GameSession:
         # 训练数据采集：决策步骤记录（状态 → 动作），对局结束时由 recorder 落盘
         self.training_steps = []
         self.recorded = False
+        self.ended_by = 'natural'   # natural / surrender（认输局标记，供数据审计豁免胜负校验）
 
     def get_state(self, viewer_role: str = None) -> dict:
         return {
@@ -125,11 +127,12 @@ class GameSession:
             ],
         }
 
-    def get_round_records(self, viewer_role: str = None) -> list:
+    def get_round_records(self, viewer_role: str = None, reveal_villain: bool = False) -> list:
         """汇总历史记录为每回合展示结构（供前端左侧滚动记录框）。
 
         viewer_role 非 'evil' 时剥离 deathMarkers 中的 villainId（信息边界，
         2026-09-02 修复），正派只能看到目标与形状。
+        reveal_villain=True 时不剥离（复盘用：对局已结束，反派身份公开）。
         """
         records = []
         for h in self.history_rounds:
@@ -144,7 +147,7 @@ class GameSession:
                 entry['surveillance'] = h.get('targets', [])
             elif ptype == 'death':
                 markers = h.get('deathMarkers', [])
-                if viewer_role != 'evil':
+                if viewer_role != 'evil' and not reveal_villain:
                     markers = [{k: v for k, v in m.items() if k != 'villainId'}
                                for m in markers]
                 entry['death'] = {
@@ -412,7 +415,9 @@ class GameSession:
     def get_record_detail(self) -> dict:
         return {
             'villains': self.villains,
-            'history': self.history_rounds,
+            # 复盘阶段身份已公开：用不脱敏的聚合回合记录（含 villainId），
+            # 正派回放时也能看到死亡标记的真实行动者
+            'history': self.get_round_records(None, reveal_villain=True),
             'finalBoard': [{'id': c['id'], 'role': c['role'], 'status': c['status']}
                            for c in self.board],
             'winner': self.winner,
@@ -430,5 +435,6 @@ class GameSession:
             'goodPlayerId': self.good_player_id,
             'evilPlayerId': self.evil_player_id,
             'aiDifficulty': self.ai_difficulty,
+            'endedBy': getattr(self, 'ended_by', 'natural'),
             'steps': self.training_steps,
         }

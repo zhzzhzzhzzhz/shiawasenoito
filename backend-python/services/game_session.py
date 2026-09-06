@@ -58,6 +58,7 @@ class GameSession:
         # 训练数据采集：决策步骤记录（状态 → 动作），对局结束时由 recorder 落盘
         self.training_steps = []
         self.recorded = False
+        self.ended_by = 'natural'   # natural / surrender（认输局标记，供数据审计豁免胜负校验）
 
     def get_state(self, viewer_role: str = None) -> dict:
         return {
@@ -434,5 +435,6 @@ class GameSession:
             'goodPlayerId': self.good_player_id,
             'evilPlayerId': self.evil_player_id,
             'aiDifficulty': self.ai_difficulty,
+            'endedBy': getattr(self, 'ended_by', 'natural'),
             'steps': self.training_steps,
         }

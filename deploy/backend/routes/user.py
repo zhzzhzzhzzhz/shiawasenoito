@@ -15,7 +15,7 @@ UPLOAD_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads', 'avatars'
 )
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB
+MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5MB
 
 # 房间背景图片目录（前端 public/placeholder-illust/background）
 BACKGROUND_DIR = os.path.join(
@@ -23,6 +23,10 @@ BACKGROUND_DIR = os.path.join(
     '..', 'frontend', 'public', 'placeholder-illust', 'background'
 )
 BACKGROUND_EXT = ('.png', '.jpg', '.jpeg', '.webp')
+
+# 目录缺失/为空时的内置兜底清单（Docker 容器内没有 frontend/public 目录；
+# 背景图实际由客户端本地打包提供，这里只需返回完整文件名列表）
+FALLBACK_BACKGROUNDS = [f'bg_{i}.webp' for i in range(1, 8)]
 
 
 def _user_dict(row: dict) -> dict:
@@ -211,7 +215,7 @@ async def upload_avatar(file: UploadFile = File(...), user: dict = Depends(get_c
 
     content = await file.read()
     if len(content) > MAX_AVATAR_SIZE:
-        return {'code': 4002, 'message': '图片大小不能超过 2MB', 'data': None}
+        return {'code': 4002, 'message': '图片大小不能超过 5MB', 'data': None}
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     saved_name = f'avatar_{user["id"]}_{uuid.uuid4().hex}.{ext}'
@@ -252,10 +256,13 @@ async def get_avatar(filename: str):
 
 @router.get('/backgrounds')
 async def list_backgrounds():
-    """返回房间背景图片文件名列表（扫描 public/placeholder-illust/background 目录，公开接口）"""
+    """返回房间背景图片文件名列表（扫描 public/placeholder-illust/background 目录，公开接口）
+    目录缺失（如 Docker 部署）时返回内置兜底清单，保证客户端可展示全部背景。"""
     try:
         files = os.listdir(BACKGROUND_DIR)
     except FileNotFoundError:
-        return {'code': 0, 'message': 'ok', 'data': []}
+        return {'code': 0, 'message': 'ok', 'data': FALLBACK_BACKGROUNDS}
     imgs = sorted(f for f in files if f.lower().endswith(BACKGROUND_EXT))
+    if not imgs:
+        return {'code': 0, 'message': 'ok', 'data': FALLBACK_BACKGROUNDS}
     return {'code': 0, 'message': 'ok', 'data': imgs}
