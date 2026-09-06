@@ -404,9 +404,21 @@ async def disconnect(sid):
         if player_id and player_id != 0:
             sess = room_manager.get_player_room(player_id)
             if sess and sess.mode != 'single':
-                # 对局未开始（waiting）→ 销毁房间；对局中 → 保留房间供重连
+                # 对局未开始（waiting）→ 清席位并通知；对局中 → 保留房间供重连
                 if sess.status == 'waiting':
                     room_manager.leave_room(player_id)
+                    # 清空对应席位（否则重连后再次输码会被「你已在房间中」拒绝）
+                    if sess.good_player_id == player_id:
+                        sess.good_player_id = None
+                        sess.good_player_account = ''
+                        sess.good_player_ready = False
+                    if sess.evil_player_id == player_id:
+                        sess.evil_player_id = None
+                        sess.evil_player_account = ''
+                        sess.evil_player_ready = False
+                    # 双方都离开/断线 → 房间销毁
+                    if sess.good_player_id is None and sess.evil_player_id is None:
+                        room_manager.remove_room(sess.room_id)
                     await sio.emit('game:opponent_left',
                                    {'message': '对手已离开房间'}, room=sess.room_id)
                 else:
@@ -649,7 +661,17 @@ async def game_leave_room(sid, data):
     room_manager.leave_room(player_id)
     await sio.leave_room(sid, room_id)
 
+    # 先记录留守方，再清空离开者席位（顺序不能反，否则误判「只剩一人」销毁房间）
     other_id = sess.evil_player_id if player_id == sess.good_player_id else sess.good_player_id
+    if sess.good_player_id == player_id:
+        sess.good_player_id = None
+        sess.good_player_account = ''
+        sess.good_player_ready = False
+    if sess.evil_player_id == player_id:
+        sess.evil_player_id = None
+        sess.evil_player_account = ''
+        sess.evil_player_ready = False
+
     if other_id is None:
         # 只剩离开者一人 → 房间销毁
         room_manager.remove_room(room_id)
@@ -658,6 +680,7 @@ async def game_leave_room(sid, data):
         # 通知留守方
         await sio.emit('game:opponent_left',
                        {'message': '对手已离开房间'}, room=room_id)
+        await broadcast_room_info(room_id)
 
 
 @sio.on('game:join_by_invite')
@@ -673,13 +696,18 @@ async def game_join_by_invite(sid, data):
         await sio.emit('game:error', {'code': 2001, 'message': '邀请码无效'}, to=sid)
         return
     if getattr(sess, 'invite_consumed', False):
-        await sio.emit('game:error', {'code': 2005, 'message': '邀请码已失效（房主已进入房间）'}, to=sid)
+        await sio.emit('game:error', {'code': 2005, 'message': '邀请码已失效（对局已开始）'}, to=sid)
         return
     if sess.status != 'waiting':
         await sio.emit('game:error', {'code': 2004, 'message': '房间已满或已开始'}, to=sid)
         return
     if sess.good_player_id == player_id or sess.evil_player_id == player_id:
-        await sio.emit('game:error', {'code': 2004, 'message': '你已在房间中'}, to=sid)
+        # 已在席位中：幂等重入（刷新页面后重新输码/误离后重连），返回当前身份
+        my_role = 'good' if sess.good_player_id == player_id else 'evil'
+        room_manager.player_rooms[str(player_id)] = invite_code
+        await sio.enter_room(sid, invite_code)
+        await sio.emit('game:joined', {'roomId': invite_code, 'myRole': my_role}, to=sid)
+        await broadcast_room_info(invite_code)
         return
 
     # 加入空余阵营
