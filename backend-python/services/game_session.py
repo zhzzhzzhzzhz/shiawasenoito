@@ -241,13 +241,17 @@ class GameSession:
         hand_before = copy.deepcopy(self.hand_cards)
         history_before = copy.deepcopy(self.history_rounds)
 
+        # 原子化提交：先在棋盘副本上校验全部标记，全部通过后才整体应用，
+        # 避免「第 N 个失败但前 N-1 个已写入」的幽灵标记突破行动次数
+        test_board = copy.deepcopy(self.board)
         for action in death_actions:
             result = place_death_marker(
-                self.board, action['villainId'], action['targetId'],
+                test_board, action['villainId'], action['targetId'],
                 action['shape'], self.round
             )
             if not result['success']:
                 return {'success': False, 'error': result['reason']}
+        self.board = test_board
 
         card['used'] = True
         self.history_rounds.append({
