@@ -11,7 +11,7 @@ type MultiTab = 'match' | 'invite' | 'join';
 export default function MultiModeSelect() {
   const navigate = useNavigate();
   const store = useGameStore();
-  const { token, roomId, mode, inviteCode } = store;
+  const { token, roomId, mode, inviteCode, notification, setNotification } = store;
 
   const [tab, setTab] = useState<MultiTab>('match');
   const [matching, setMatching] = useState(false);
@@ -21,6 +21,13 @@ export default function MultiModeSelect() {
   const navigateRef = useRef(navigate);
   const roomRef = useRef<{ roomId: string | null; mode: string | null }>({ roomId, mode });
   roomRef.current = { roomId, mode };
+
+  // 通知条自动消失
+  useEffect(() => {
+    if (!notification) return;
+    const t = setTimeout(() => setNotification(null), 4000);
+    return () => clearTimeout(t);
+  }, [notification, setNotification]);
 
   // 连接 socket
   useEffect(() => {
@@ -82,9 +89,7 @@ export default function MultiModeSelect() {
 
   const enterRoom = () => {
     if (roomId && mode === 'invite') {
-      // 进入房间：邀请码立即销毁（后端拒绝再加入），前端同步清码
-      getSocket()?.emit('game:invite_enter', { roomId });
-      useGameStore.getState().setInviteCode(null);
+      // 进入房间：邀请码保留（开局瞬间才销毁），等待页继续展示给房主
       navigate('/multi/game');
     }
   };
@@ -117,6 +122,21 @@ export default function MultiModeSelect() {
       <FullscreenButton />
       <ModeSelectBackground />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#7c3aed] rounded-full blur-[150px] opacity-10 pointer-events-none" />
+
+      {/* 通知条（加入失败/系统提示等，与对局页一致） */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-sm ${
+              notification.type === 'error' ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+              : notification.type === 'success' ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+              : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}`}
+          >
+            {notification.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <motion.div
         className="relative w-full max-w-md mx-auto px-4"

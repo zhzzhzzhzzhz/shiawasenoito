@@ -116,6 +116,8 @@ async def start_game(room_id: str):
         return
     session.status = 'playing'
     session.phase = Phase.ACTION
+    # 开局瞬间销毁邀请码（之后任何人持旧码无法加入）
+    session.invite_consumed = True
     await sio.emit('game:started', session.get_state(), room=room_id)
     await broadcast_game_state(room_id)
     await auto_advance_loop(room_id)
@@ -625,21 +627,9 @@ async def game_create_invite(sid, data):
 
 @sio.on('game:invite_enter')
 async def game_invite_enter(sid, data):
-    """房主点击「进入房间」：邀请码立即销毁，之后任何人无法再用该码加入"""
-    room_id = data.get('roomId') if isinstance(data, dict) else None
-    if not room_id:
-        return
-    async with sio.session(sid) as session:
-        user = session.get('user', {})
-        player_id = user.get('id')
-    sess = room_manager.get_room(room_id)
-    if not sess or sess.mode != 'invite':
-        return
-    # 仅房主可销毁邀请码
-    if player_id not in (sess.good_player_id, sess.evil_player_id):
-        return
-    sess.invite_consumed = True
-    print(f'[Socket] 邀请码销毁: room={room_id}')
+    """房主点击「进入房间」：不再销毁邀请码（销毁时机改为开局瞬间，见 start_game）。
+    保留本事件仅为兼容旧版前端 emit。"""
+    return
 
 
 @sio.on('game:leave_room')

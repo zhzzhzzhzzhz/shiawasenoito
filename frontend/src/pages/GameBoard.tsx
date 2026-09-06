@@ -28,7 +28,7 @@ export default function GameBoardPage() {
   const {
     token, roomId, mode, myRole, phase, round, board, handCards,
     winner, gameStatus, notification, countdown, roundRecords,
-    setNotification, roomInfo, user,
+    setNotification, roomInfo, user, inviteCode,
   } = store;
 
   // ---- 正派监视 ----
@@ -947,6 +947,14 @@ export default function GameBoardPage() {
               等待对手
             </h2>
             <p className="text-[var(--color-text-dim)] text-sm mb-6">双方都点「准备」后开始对局</p>
+
+            {/* 房主可见：邀请码在对局开始前一直有效 */}
+            {inviteCode && (
+              <div className="mb-4 px-4 py-3 rounded-xl bg-[#7c3aed]/15 border border-[#7c3aed]/40">
+                <p className="text-xs text-[var(--color-text-dim)] mb-1">邀请码（开局前有效，分享给好友）</p>
+                <p className="text-2xl font-bold tracking-[0.3em] text-purple-300 text-center select-all">{inviteCode}</p>
+              </div>
+            )}
 
             <div className="space-y-3 mb-6 text-left">
               {(roomInfo?.players ?? []).map(p => {
