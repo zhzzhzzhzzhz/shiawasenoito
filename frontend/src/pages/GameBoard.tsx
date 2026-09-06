@@ -44,13 +44,6 @@ export default function GameBoardPage() {
   const [selectedVillain, setSelectedVillain] = useState<number | null>(null);
   // 拖拽中的死亡标记形状（用于实时范围预览；形状由拖动的标记决定）
   const [dragShape, setDragShape] = useState<'九宫格' | '十字' | null>(null);
-  // 待确认标记（拖放到角色卡后先进入确认态，点击 ✓ 才生效；✗ 或拖回面板取消）
-  const [pendingMarker, setPendingMarker] = useState<{
-    kind: 'death' | 'surveillance';
-    targetId: number;
-    shape?: '九宫格' | '十字';
-  } | null>(null);
-
   // ---- 左键拖拽引擎（标记：按住拖动、松开放置/取消/换目标/回面板） ----
   type DragState = {
     payload: DragPayload;
@@ -351,7 +344,6 @@ export default function GameBoardPage() {
   };
 
   const cancelEvilAction = () => {
-    setPendingMarker(null);
     setDragShape(null);
     if (evilStep === 'select-target') {
       setEvilStep('select-villain');
@@ -376,37 +368,38 @@ export default function GameBoardPage() {
     return null;
   }, [goodCanSelect, canPlayAction, evilStep, board, rangeIds]);
 
-  // ---- 待确认标记：确认放置（此时才真正生效） ----
-  const confirmPendingMarker = useCallback(() => {
-    if (!pendingMarker) return;
-    if (pendingMarker.kind === 'surveillance') {
-      handleGoodCharClick(pendingMarker.targetId);
-    } else if (pendingMarker.shape) {
-      placeDeathMarker(pendingMarker.targetId, pendingMarker.shape);
-    }
-    setPendingMarker(null);
-  }, [pendingMarker, handleGoodCharClick, placeDeathMarker]);
-
-  // ---- 待确认标记：取消（点击 ✕） ----
-  const cancelPendingMarker = useCallback(() => {
-    setPendingMarker(null);
-    setDragShape(null);
-  }, []);
-
-  // ---- 本地已放置标记（回合提交前可反悔）：targetId → 形状 ----
+  // ---- 本地已放置标记（回合提交前可反悔）：targetId → 标记信息 ----
   const localMarkers = useMemo(() => {
-    const m = new Map<number, '九宫格' | '十字'>();
-    for (const a of localDeathActions) m.set(a.targetId, a.shape);
+    const m = new Map<number, { kind: 'death' | 'surveillance'; shape?: '九宫格' | '十字' }>();
+    for (const a of localDeathActions) m.set(a.targetId, { kind: 'death', shape: a.shape });
+    for (const id of surveillanceTargets) m.set(id, { kind: 'surveillance' });
     return m;
-  }, [localDeathActions]);
+  }, [localDeathActions, surveillanceTargets]);
 
-  // 移除已放置的本地标记（反悔）
-  const removeLocalDeathAction = useCallback((targetId: number) => {
-    setLocalDeathActions((prev) => prev.filter((a) => a.targetId !== targetId));
+  // 移除已放置的本地标记（反悔）：按标记类型分派
+  const removeLocalMarker = useCallback((targetId: number) => {
+    setLocalDeathActions((prev) => {
+      if (prev.some((a) => a.targetId === targetId)) {
+        return prev.filter((a) => a.targetId !== targetId);
+      }
+      return prev;
+    });
+    setSurveillanceTargets((prev) => prev.filter((id) => id !== targetId));
   }, []);
 
-  // 已放置标记切换目标（拖到其他角色卡）
-  const moveLocalMarker = useCallback((targetId: number, newTargetId: number) => {
+  // 已放置标记切换目标（拖到其他角色卡）：按标记类型分派
+  const moveLocalMarker = useCallback((targetId: number, newTargetId: number, markerKind: 'death' | 'surveillance') => {
+    if (markerKind === 'surveillance') {
+      // 监视换目标：新目标须存活且未被监视
+      setSurveillanceTargets((prev) => {
+        if (!prev.includes(targetId)) return prev;
+        if (prev.includes(newTargetId)) return prev;
+        const c = board.find((ch) => ch.id === newTargetId);
+        if (!c || c.status !== 'alive') return prev;
+        return prev.map((id) => (id === targetId ? newTargetId : id));
+      });
+      return;
+    }
     setLocalDeathActions((prev) => {
       const act = prev.find((a) => a.targetId === targetId);
       if (!act) return prev;
@@ -455,20 +448,20 @@ export default function GameBoardPage() {
       setDragShape(null);
 
       if (st.payload.kind === 'remove-local') {
-        // 已放置标记拖拽：换目标 / 回面板或空白（反悔，回到回合开始时的位置）
+        // 已放置标记拖拽：换目标 / 拖到空白或面板（反悔，回到回合开始时的位置）
         if (st.hoverCharId != null && st.hoverCharId !== st.payload.targetId) {
-          moveLocalMarker(st.payload.targetId, st.hoverCharId);
+          moveLocalMarker(st.payload.targetId, st.hoverCharId, st.payload.markerKind);
         } else if (st.hoverCharId == null) {
-          removeLocalDeathAction(st.payload.targetId);
+          removeLocalMarker(st.payload.targetId);
         }
         // 拖回原目标卡本身 → 保持不动
       } else {
-        // 面板标记拖出：放到可放置角色卡 → 待确认；其他位置 → 取消
+        // 面板标记拖出：放到可放置角色卡 → 直接生效；其他位置 → 取消
         if (st.hoverCharId != null && dropTargetIdsRef.current?.has(st.hoverCharId)) {
           if (st.payload.kind === 'surveillance') {
-            setPendingMarker({ kind: 'surveillance', targetId: st.hoverCharId });
+            handleGoodCharClick(st.hoverCharId);
           } else {
-            setPendingMarker({ kind: 'death', targetId: st.hoverCharId, shape: st.payload.shape });
+            placeDeathMarker(st.hoverCharId, st.payload.shape);
           }
         }
       }
@@ -479,7 +472,7 @@ export default function GameBoardPage() {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
-  }, [moveLocalMarker, removeLocalDeathAction]);
+  }, [moveLocalMarker, removeLocalMarker, handleGoodCharClick, placeDeathMarker]);
 
   const allActionsDone = localDeathActions.length === maxActions && maxActions > 0;
 
@@ -564,9 +557,6 @@ export default function GameBoardPage() {
     setMenuOpen(false);
   };
 
-  // ---- 正派选中角色（放置监视 / 附加监视） ----
-  const highlightedChars = goodCanSelect ? surveillanceTargets : [];
-
   // ---- 角色卡交互：反派仅在 select-villain 阶段点击选反派；标记放置统一走拖拽 ----
   const boardInteractive = goodCanSelect ||
     (canPlayAction && (evilStep === 'select-villain' || evilStep === 'select-target'));
@@ -583,7 +573,7 @@ export default function GameBoardPage() {
         <Board
           board={board}
           viewerRole={viewerRole}
-          selectedCharacters={highlightedChars}
+          selectedCharacters={[]}
           onCharacterClick={boardOnClick}
           interactive={boardInteractive}
           dimmedIds={dimmedIds}
@@ -593,13 +583,15 @@ export default function GameBoardPage() {
           }
           dropTargetIds={dropTargetIds}
           hoverCharId={dragState?.hoverCharId ?? null}
-          pendingMarkerTarget={pendingMarker?.targetId ?? null}
-          onConfirmMarker={confirmPendingMarker}
-          onCancelMarker={cancelPendingMarker}
           localMarkers={localMarkers}
           localMarkerRound={round}
-          onRemoveLocalMarker={removeLocalDeathAction}
-          onLocalMarkerPointerDown={(e, targetId) => startMarkerDrag({ kind: 'remove-local', targetId }, e)}
+          onRemoveLocalMarker={removeLocalMarker}
+          onLocalMarkerPointerDown={(e, targetId) =>
+            startMarkerDrag(
+              { kind: 'remove-local', targetId, markerKind: localMarkers.get(targetId)?.kind ?? 'death', shape: localMarkers.get(targetId)?.shape },
+              e
+            )
+          }
         />
       </motion.div>
     </div>
@@ -641,10 +633,15 @@ export default function GameBoardPage() {
             className="fixed z-[60] pointer-events-none -translate-x-1/2 -translate-y-1/2"
             style={{ left: dragState.x, top: dragState.y }}
           >
-            {dragState.payload.kind === 'surveillance' ? (
+            {dragState.payload.kind === 'surveillance' || (dragState.payload.kind === 'remove-local' && dragState.payload.markerKind === 'surveillance') ? (
               <img src={surveillanceIllustration(round)} alt="监视" className="w-10 h-10 object-contain drop-shadow-lg" draggable={false} />
-            ) : dragState.payload.kind === 'death' ? (
-              <img src={markerIllustration(dragState.payload.shape, round)} alt={dragState.payload.shape} className="w-10 h-10 object-contain drop-shadow-lg" draggable={false} />
+            ) : dragState.payload.kind === 'death' || (dragState.payload.kind === 'remove-local' && dragState.payload.shape) ? (
+              <img
+                src={markerIllustration(dragState.payload.kind === 'death' ? dragState.payload.shape : dragState.payload.shape!, round)}
+                alt="标记"
+                className="w-10 h-10 object-contain drop-shadow-lg"
+                draggable={false}
+              />
             ) : (
               <span className="text-2xl">💨</span>
             )}

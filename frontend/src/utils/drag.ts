@@ -8,7 +8,12 @@
 export type DragPayload =
   | { kind: 'death'; shape: '九宫格' | '十字' }
   | { kind: 'surveillance' }
-  | { kind: 'remove-local'; targetId: number };
+  | {
+      kind: 'remove-local';
+      targetId: number;
+      markerKind: 'death' | 'surveillance';
+      shape?: '九宫格' | '十字';
+    };
 
 /** dataTransfer 使用的 MIME 类型（自定义，避免与 text/plain 冲突） */
 export const DRAG_MIME = 'application/x-marker';

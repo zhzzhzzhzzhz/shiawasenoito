@@ -29,6 +29,11 @@ function SurveillanceBadge({ round, active }: { round: number; active: boolean }
   );
 }
 
+interface LocalMarker {
+  kind: 'death' | 'surveillance';
+  shape?: '九宫格' | '十字';
+}
+
 interface CharacterCardProps {
   char: CharacterState;
   viewerRole: string | null;
@@ -42,15 +47,11 @@ interface CharacterCardProps {
   dropTarget?: boolean;
   /** 左键拖拽中悬停本卡（高亮） */
   hovered?: boolean;
-  /** 该卡上存在待确认标记：显示确认/取消浮层，未确认不生效 */
-  pendingConfirm?: boolean;
-  onConfirm?: () => void;
-  onCancel?: () => void;
-  /** 本地已确认放置的标记形状（回合提交前可反悔移除） */
-  localMarkerShape?: '九宫格' | '十字' | null;
-  /** 本地标记显示的回合（用于插画） */
+  /** 本地已放置的标记（确认后、回合提交前可点击移除或按住拖拽） */
+  localMarker?: LocalMarker | null;
+  /** 本地标记插画使用的回合 */
   localMarkerRound?: number;
-  /** 点击移除本地已放置标记 */
+  /** 点击移除本地标记 */
   onRemoveLocalMarker?: () => void;
   /** 本地标记左键按住开始拖拽（换目标/回面板） */
   onLocalMarkerPointerDown?: (e: React.MouseEvent) => void;
@@ -60,8 +61,7 @@ export default function CharacterCard({
   char, viewerRole, isSelected, onClick, disabled,
   dimmed = false, inRange = false, villainHighlight = false,
   dropTarget = false, hovered = false,
-  pendingConfirm = false, onConfirm, onCancel,
-  localMarkerShape = null, localMarkerRound = 1,
+  localMarker = null, localMarkerRound = 1,
   onRemoveLocalMarker, onLocalMarkerPointerDown,
 }: CharacterCardProps) {
   const isDead = char.status === 'dead' || char.status === 'default_dead';
@@ -141,13 +141,13 @@ export default function CharacterCard({
       className={className}
       style={{ background: bgColor, borderColor, ...extraStyle }}
       onClick={() => {
-        if (localMarkerShape) {
+        if (localMarker) {
           onRemoveLocalMarker?.();
         } else {
           onClick();
         }
       }}
-      disabled={disabled || (dimmed && !villainHighlight)}
+      disabled={localMarker ? false : (disabled || (dimmed && !villainHighlight))}
       whileHover={(disabled || dimmed) ? {} : { scale: 1.05, y: -4 }}
       whileTap={(disabled || dimmed) ? {} : { scale: 0.95 }}
       animate={isSelected || villainHighlight ? { scale: 1.05 } : { scale: 1 }}
@@ -216,54 +216,43 @@ export default function CharacterCard({
       )}
 
       {/* 本地已放置标记（回合提交前可点击移除 / 左键按住拖拽换目标或回面板） */}
-      {localMarkerShape && (
+      {localMarker && (
         <div
           className="absolute inset-0 z-[25] flex flex-col items-center justify-center pointer-events-none"
         >
-          <img
-            src={markerIllustration(localMarkerShape, localMarkerRound)}
-            alt={localMarkerShape}
-            className="w-10 h-10 object-contain drop-shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing"
-            draggable={false}
-            title={`${localMarkerShape} · 按住拖动切换目标，拖到空白处取消`}
-            onMouseDown={(e) => {
-              if (e.button !== 0) return;
-              e.preventDefault();
-              e.stopPropagation();
-              onLocalMarkerPointerDown?.(e);
-            }}
-          />
+          {localMarker.kind === 'surveillance' ? (
+            <img
+              src={surveillanceIllustration(localMarkerRound)}
+              alt="监视"
+              className="w-10 h-10 object-contain drop-shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing"
+              draggable={false}
+              title="监视 · 按住拖动切换目标，拖到空白处取消"
+              onMouseDown={(e) => {
+                if (e.button !== 0) return;
+                e.preventDefault();
+                e.stopPropagation();
+                onLocalMarkerPointerDown?.(e);
+              }}
+            />
+          ) : (
+            <img
+              src={markerIllustration(localMarker.shape || '', localMarkerRound)}
+              alt={localMarker.shape || '标记'}
+              className="w-10 h-10 object-contain drop-shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing"
+              draggable={false}
+              title={`${localMarker.shape} · 按住拖动切换目标，拖到空白处取消`}
+              onMouseDown={(e) => {
+                if (e.button !== 0) return;
+                e.preventDefault();
+                e.stopPropagation();
+                onLocalMarkerPointerDown?.(e);
+              }}
+            />
+          )}
           <span className="text-[8px] mt-0.5 px-1 rounded bg-black/60 text-white/80">
             按住拖动换目标 · 点击卡移除
           </span>
         </div>
-      )}
-
-      {/* 待确认标记浮层：确认放置 ✓ / 取消 ✗（未确认前不生效，可拖回待放置区） */}
-      {pendingConfirm && (
-        <motion.div
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-1.5 rounded-lg"
-          style={{ background: 'rgba(10, 10, 26, 0.72)' }}
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-        >
-          <div className="flex items-center gap-2">
-            <span
-              role="button"
-              title="确认放置"
-              onClick={(e) => { e.stopPropagation(); onConfirm?.(); }}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-bold cursor-pointer
-                bg-emerald-500/90 text-white hover:bg-emerald-400 transition-colors"
-            >✓</span>
-            <span
-              role="button"
-              title="取消（可拖回面板）"
-              onClick={(e) => { e.stopPropagation(); onCancel?.(); }}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-bold cursor-pointer
-                bg-rose-500/90 text-white hover:bg-rose-400 transition-colors"
-            >✕</span>
-          </div>
-          <span className="text-[9px] text-white/70 tracking-wider">确认放置</span>
-        </motion.div>
       )}
     </motion.button>
   );

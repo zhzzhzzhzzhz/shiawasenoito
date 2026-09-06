@@ -14,12 +14,8 @@ interface BoardProps {
   dropTargetIds?: Set<number> | null;
   /** 左键拖拽中悬停的角色卡（高亮提示放置目标） */
   hoverCharId?: number | null;
-  /** 待确认标记所在角色卡 id（确认前不生效） */
-  pendingMarkerTarget?: number | null;
-  onConfirmMarker?: () => void;
-  onCancelMarker?: () => void;
-  /** 本地已确认放置的标记（targetId → 形状，回合提交前可反悔移除） */
-  localMarkers?: Map<number, '九宫格' | '十字'>;
+  /** 本地已放置的标记（targetId → 标记信息，回合提交前可反悔移除） */
+  localMarkers?: Map<number, { kind: 'death' | 'surveillance'; shape?: '九宫格' | '十字' }>;
   /** 本地标记插画使用的回合 */
   localMarkerRound?: number;
   onRemoveLocalMarker?: (targetId: number) => void;
@@ -31,7 +27,6 @@ export default function Board({
   board, viewerRole, selectedCharacters, onCharacterClick,
   interactive, dimmedIds, villainHighlightIds, rangeIds,
   dropTargetIds = null, hoverCharId = null,
-  pendingMarkerTarget = null, onConfirmMarker, onCancelMarker,
   localMarkers, localMarkerRound = 1, onRemoveLocalMarker, onLocalMarkerPointerDown,
 }: BoardProps) {
   return (
@@ -43,9 +38,8 @@ export default function Board({
         const inRange = rangeIds ? rangeIds.has(char.id) : false;
         const villain = villainHighlightIds ? villainHighlightIds.has(char.id) : false;
         const canDrop = dropTargetIds ? dropTargetIds.has(char.id) : false;
-        const isPending = pendingMarkerTarget === char.id;
         const hovered = hoverCharId === char.id;
-        const localShape = localMarkers?.get(char.id) ?? null;
+        const localMarker = localMarkers?.get(char.id) ?? null;
 
         return (
           <CharacterCard
@@ -55,18 +49,15 @@ export default function Board({
             isSelected={selectedCharacters.includes(char.id)}
             onClick={() => canInteract && onCharacterClick(char.id)}
             disabled={!canInteract}
-            dimmed={dimmed}
+            dimmed={localMarker ? false : dimmed}
             inRange={inRange}
             villainHighlight={villain}
             dropTarget={canDrop || hovered}
             hovered={hovered}
-            pendingConfirm={isPending}
-            onConfirm={isPending ? onConfirmMarker : undefined}
-            onCancel={isPending ? onCancelMarker : undefined}
-            localMarkerShape={localShape}
+            localMarker={localMarker}
             localMarkerRound={localMarkerRound}
-            onRemoveLocalMarker={localShape ? () => onRemoveLocalMarker?.(char.id) : undefined}
-            onLocalMarkerPointerDown={localShape ? (e) => onLocalMarkerPointerDown?.(e, char.id) : undefined}
+            onRemoveLocalMarker={localMarker ? () => onRemoveLocalMarker?.(char.id) : undefined}
+            onLocalMarkerPointerDown={localMarker ? (e) => onLocalMarkerPointerDown?.(e, char.id) : undefined}
           />
         );
       })}
