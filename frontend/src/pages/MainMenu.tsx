@@ -5,6 +5,7 @@ import { useGameStore, restoreActiveGame } from '../store/gameStore';
 import FullscreenButton from '../components/FullscreenButton';
 import UserAvatar from '../components/UserAvatar';
 import AccountSidebar from '../components/AccountSidebar';
+import { useBgm } from '../audio/useBgm';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,6 +30,9 @@ export default function MainMenu() {
   const [bgReady, setBgReady] = useState(true); // 背景视频是否可用（缺失时回退光晕背景）
   // 刷新/误退后有进行中的对局 → 显示恢复入口
   const [activeGame] = useState(() => restoreActiveGame());
+
+  // 主菜单 BGM（menu 池循环抽取）
+  useBgm('menu');
 
   return (
     <div className="relative h-screen w-screen flex items-center justify-center bg-[#0a0a1a] overflow-hidden"><FullscreenButton />

@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import FullscreenButton from '../components/FullscreenButton';
 import TitleThreads from '../components/TitleThreads';
+import { useBgm } from '../audio/useBgm';
 
 const particles = Array.from({ length: 20 }, (_, i) => ({
   id: i,
@@ -39,6 +40,8 @@ export default function StartScreen() {
 
   // playing: false=待点击(循环背景视频) | true=点击后播放过渡视频
   const [playing, setPlaying] = useState(false);
+  // 开屏待机（splash 池）/ 进入动画（enter 固定一首）BGM
+  useBgm(playing ? 'enter' : 'splash');
   const [videoReady, setVideoReady] = useState(true); // 主视频是否可用（缺失时回退粒子动画）
   const [currentVideo, setCurrentVideo] = useState(SPLASH_MAIN); // 当前播放的开屏视频
   const [playToken, setPlayToken] = useState(0); // 递增触发视频重挂载重播

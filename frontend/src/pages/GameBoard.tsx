@@ -16,6 +16,7 @@ import ActionCardHistory from '../components/ActionCardHistory';
 import ActionCardReveal from '../components/ActionCardReveal';
 import { getAffectedCharIds, charIdToPos } from '../utils/board';
 import type { DragPayload } from '../utils/drag';
+import { useBgm } from '../audio/useBgm';
 import { randomBackground, backgroundUrl, getBackgroundFiles, markerIllustration, surveillanceIllustration } from '../config/illustrations';
 import type { DeathAction } from '../types';
 
@@ -30,6 +31,9 @@ export default function GameBoardPage() {
     winner, gameStatus, notification, countdown, roundRecords,
     setNotification, roomInfo, user, inviteCode,
   } = store;
+
+  // 对局 BGM（game 池循环抽取，含邀请等待页）
+  useBgm('game');
 
   // ---- 正派监视 ----
   const [surveillanceTargets, setSurveillanceTargets] = useState<number[]>([]);
