@@ -447,6 +447,14 @@ export default function GameBoardPage() {
       setDragState(null);
       setDragShape(null);
 
+      // 保险：最后一帧命中未通过 mousemove 更新时，松开瞬间重新检测
+      if (st.hoverCharId == null) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        st.hoverCharId = el?.closest?.('[data-char-id]')
+          ? Number((el.closest('[data-char-id]') as HTMLElement).dataset.charId)
+          : null;
+      }
+
       if (st.payload.kind === 'remove-local') {
         // 已放置标记拖拽：换目标 / 拖到空白或面板（反悔，回到回合开始时的位置）
         if (st.hoverCharId != null && st.hoverCharId !== st.payload.targetId) {
@@ -563,8 +571,8 @@ export default function GameBoardPage() {
     setMenuOpen(false);
   };
 
-  // ---- 角色卡交互：重叠选择时点击候选反派选定；其余状态点击无操作 ----
-  const boardInteractive = goodCanSelect || !!pendingVillainChoice;
+  // ---- 角色卡交互：重叠选择时点击候选反派选定；拖拽中卡片保持可命中 ----
+  const boardInteractive = goodCanSelect || !!pendingVillainChoice || (canPlayAction && !!dragShape);
   const boardOnClick = pendingVillainChoice ? handleChooseVillain : () => {};
 
   // ---- 范围分色：每张卡归属的反派范围色（重叠处标记提示） ----
