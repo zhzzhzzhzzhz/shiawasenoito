@@ -1,5 +1,5 @@
 // Electron 主进程：加载前端构建产物，并把后端地址注入渲染进程
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -24,6 +24,8 @@ function loadBackendUrl() {
 
 const BACKEND_URL = loadBackendUrl();
 
+let mainWin = null;
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
@@ -40,6 +42,7 @@ function createWindow() {
       additionalArguments: [`--backend-url=${BACKEND_URL}`],
     },
   });
+  mainWin = win;
 
   // 窗口最大化按钮统一为全屏（与游戏内右上角全屏按钮行为一致）
   win.on('maximize', () => {
@@ -49,11 +52,41 @@ function createWindow() {
     }
   });
 
+  // 全屏状态变化推送给渲染进程（游戏内按钮图标实时同步）
+  win.on('enter-full-screen', () => {
+    if (!win.isDestroyed()) win.webContents.send('window:fullscreen-changed', true);
+  });
+  win.on('leave-full-screen', () => {
+    if (!win.isDestroyed()) win.webContents.send('window:fullscreen-changed', false);
+  });
+
+  // 原生全屏时按 Esc 退出全屏（不 preventDefault，页面其他 Esc 功能不受影响）
+  win.webContents.on('before-input-event', (_event, input) => {
+    if (input.type === 'keyDown' && input.key === 'Escape' && win.isFullScreen()) {
+      win.setFullScreen(false);
+    }
+  });
+
+  win.on('closed', () => { if (mainWin === win) mainWin = null; });
+
   // 加载前端构建产物（desktop/dist，打包前由 frontend/dist 复制而来）
   win.loadFile(path.join(__dirname, 'dist', 'index.html'));
 }
 
 app.whenReady().then(() => {
+  // 切换原生全屏（游戏内按钮调用），返回切换后的全屏状态
+  ipcMain.handle('window:toggle-fullscreen', () => {
+    const w = mainWin;
+    if (!w || w.isDestroyed()) return false;
+    w.setFullScreen(!w.isFullScreen());
+    return w.isFullScreen();
+  });
+
+  // 退出应用（玩家信息面板「关闭游戏」）
+  ipcMain.on('window:quit', () => {
+    app.quit();
+  });
+
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

@@ -448,6 +448,22 @@ export default function AccountSidebar({ open, onClose }: AccountSidebarProps) {
                       <span className="text-lg leading-none">🚪</span>
                       <span className="text-xs font-bold leading-tight whitespace-nowrap">退出登录</span>
                     </button>
+                    {/* 关闭游戏：桌面端退出应用，网页版尽力关闭窗口 */}
+                    <button
+                      onClick={() => {
+                        const wc = (window as unknown as { windowControls?: { quitGame?: () => void } }).windowControls;
+                        if (wc?.quitGame) {
+                          wc.quitGame();
+                        } else {
+                          window.close();
+                        }
+                      }}
+                      className="w-full px-1 py-2 flex flex-col items-center gap-1 text-gray-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+                      title="退出游戏应用"
+                    >
+                      <span className="text-base leading-none">🔚</span>
+                      <span className="text-[10px] font-bold leading-tight whitespace-nowrap">关闭游戏</span>
+                    </button>
                   </div>
                 </motion.div>
 
