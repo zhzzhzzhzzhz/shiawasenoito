@@ -48,6 +48,8 @@ export default function GameBoardPage() {
   } | null>(null);
   // 拖拽中的死亡标记形状（用于实时范围预览；形状由拖动的标记决定）
   const [dragShape, setDragShape] = useState<'九宫格' | '十字' | null>(null);
+  // 拖拽「已放置的死亡标记」时记录其行动者与当前位置（换目标范围预览用）
+  const [dragMoveMarker, setDragMoveMarker] = useState<{ targetId: number; villainId: number } | null>(null);
   // ---- 左键拖拽引擎（标记：按住拖动、松开放置/取消/换目标/回面板） ----
   type DragState = {
     payload: DragPayload;
@@ -102,6 +104,20 @@ export default function GameBoardPage() {
     socket.on('connect', onConnect);
     return () => { socket.off('connect', onConnect); };
   }, []);
+
+  // ---- 房间无效兜底：对局中收到 2001（如误点恢复进入已删除的房间）→ 清状态回主菜单 ----
+  useEffect(() => {
+    const sock = getSocket();
+    if (!sock) return;
+    const onError = (data: { code?: number; message?: string } | null | undefined) => {
+      if (data && data.code === 2001) {
+        useGameStore.getState().reset();
+        navigate('/');
+      }
+    };
+    sock.on('game:error', onError);
+    return () => { sock.off('game:error', onError); };
+  }, [navigate]);
 
   // ---- 结算导航 ----
   useEffect(() => {
@@ -187,6 +203,17 @@ export default function GameBoardPage() {
   const allVillainRanges = useMemo(() => {
     const m = new Map<number, Set<number>>();
     if (!dragShape || !canPlayAction) return m;
+    // 换目标预览：只计算被拖拽标记所属反派的范围（保留自己的当前目标）
+    if (dragMoveMarker) {
+      const pos = charIdToPos(dragMoveMarker.villainId);
+      const ids = new Set(getAffectedCharIds(pos.row, pos.col, dragShape).filter(id => {
+        const c = board.find(ch => ch.id === id);
+        return c && c.status === 'alive' &&
+          !localDeathActions.some(a => a.targetId === id && id !== dragMoveMarker.targetId);
+      }));
+      m.set(dragMoveMarker.villainId, ids);
+      return m;
+    }
     const avail = activeVillains.filter(v => !usedVillainIds.has(v.id));
     for (const v of avail) {
       const pos = charIdToPos(v.id);
@@ -198,7 +225,7 @@ export default function GameBoardPage() {
       m.set(v.id, ids);
     }
     return m;
-  }, [dragShape, canPlayAction, activeVillains, usedVillainIds, board, localDeathActions]);
+  }, [dragShape, canPlayAction, dragMoveMarker, activeVillains, usedVillainIds, board, localDeathActions]);
 
   // ---- 反派高亮（重叠选择时：候选反派金色高亮供点击选定） ----
   const villainHighlightIds = useMemo(() => {
@@ -413,8 +440,19 @@ export default function GameBoardPage() {
     const st: DragState = { payload, x: e.clientX, y: e.clientY, hoverCharId: null, hoverPanel: false };
     dragRef.current = st;
     setDragState(st);
-    if (payload.kind === 'death') setDragShape(payload.shape);
-  }, []);
+    if (payload.kind === 'death') {
+      setDragShape(payload.shape);
+      setDragMoveMarker(null);
+    } else if (payload.kind === 'remove-local' && payload.markerKind === 'death' && payload.shape) {
+      // 拖拽已放置的死亡标记：按所属反派高亮换目标范围
+      const act = localDeathActions.find(a => a.targetId === payload.targetId);
+      setDragShape(payload.shape);
+      setDragMoveMarker(act ? { targetId: payload.targetId, villainId: act.villainId } : null);
+    } else {
+      setDragShape(null);
+      setDragMoveMarker(null);
+    }
+  }, [localDeathActions]);
 
   // 拖拽分派所需的最新值（全局监听用 ref 避免闭包过期）
   const dropTargetIdsRef = useRef(dropTargetIds);
@@ -446,6 +484,7 @@ export default function GameBoardPage() {
       dragRef.current = null;
       setDragState(null);
       setDragShape(null);
+      setDragMoveMarker(null);
 
       // 保险：最后一帧命中未通过 mousemove 更新时，松开瞬间重新检测
       if (st.hoverCharId == null) {
@@ -565,6 +604,8 @@ export default function GameBoardPage() {
       sock.emit('game:surrender', { roomId });
     } else {
       sock.emit('game:abandon', { roomId });
+      // 放弃：后端不发 game:result，需主动清除对局状态（含恢复记录），与投降/退出对齐
+      useGameStore.getState().reset();
       navigate('/main');
     }
     setConfirmAction(null);
@@ -572,7 +613,7 @@ export default function GameBoardPage() {
   };
 
   // ---- 角色卡交互：重叠选择时点击候选反派选定；拖拽中卡片保持可命中 ----
-  const boardInteractive = goodCanSelect || !!pendingVillainChoice || (canPlayAction && !!dragShape);
+  const boardInteractive = goodCanSelect || !!pendingVillainChoice || !!dragState;
   const boardOnClick = pendingVillainChoice ? handleChooseVillain : () => {};
 
   // ---- 范围分色：每张卡归属的反派范围色（重叠处标记提示） ----
