@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="660" viewBox="0 0 960 660" role="img" aria-labelledby="title desc">
+  <title id="title">LLM 智能体决策流程图</title>
+  <desc id="desc">单次决策流程：DecisionContext 快照经 encode_observation 编码后调用 LLM 网关，经 JSON 解析、形状归一化与规则校验；校验通过返回游戏引擎执行，不通过则携错重试，二次失败进入 RuleBrain 回退与阶段跳过保护。</desc>
+  <rect width="960" height="660" fill="#ffffff"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#455a64" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <g font-family="'Microsoft YaHei','PingFang SC',Arial,sans-serif" fill="#263238">
+    <rect x="290" y="30" width="380" height="56" rx="8" fill="#eef4fc" stroke="#4a6fa5" stroke-width="1.2"/>
+    <text x="480" y="54" text-anchor="middle" font-size="14" font-weight="600">DecisionContext（单次决策快照）</text>
+    <text x="480" y="74" text-anchor="middle" font-size="11" fill="#52606d">side · round · phase · difficulty · board · hand_cards</text>
+    <line x1="480" y1="86" x2="480" y2="120" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <rect x="290" y="120" width="380" height="56" rx="8" fill="#eef4fc" stroke="#4a6fa5" stroke-width="1.2"/>
+    <text x="480" y="144" text-anchor="middle" font-size="14" font-weight="600">encode_observation(ctx, side)</text>
+    <text x="480" y="164" text-anchor="middle" font-size="11" fill="#52606d">8 类字段 · 按阵营过滤（role／belief／action_space）</text>
+    <line x1="480" y1="176" x2="480" y2="210" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <rect x="290" y="210" width="380" height="56" rx="8" fill="#eef4fc" stroke="#4a6fa5" stroke-width="1.2"/>
+    <text x="480" y="234" text-anchor="middle" font-size="14" font-weight="600">llm_gateway.chat()</text>
+    <text x="480" y="254" text-anchor="middle" font-size="11" fill="#52606d">JSON 模式 · max_tokens 3000 · stream=False</text>
+    <line x1="480" y1="266" x2="480" y2="300" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <rect x="270" y="300" width="420" height="56" rx="8" fill="#eef4fc" stroke="#4a6fa5" stroke-width="1.2"/>
+    <text x="480" y="324" text-anchor="middle" font-size="14" font-weight="600">_parse_json() → _normalize_shapes()</text>
+    <text x="480" y="344" text-anchor="middle" font-size="11" fill="#52606d">截取首个 { … } · nine_grid／cross → 九宫格／十字</text>
+    <line x1="480" y1="356" x2="480" y2="390" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <rect x="290" y="390" width="380" height="56" rx="8" fill="#eef4fc" stroke="#4a6fa5" stroke-width="1.2"/>
+    <text x="480" y="414" text-anchor="middle" font-size="14" font-weight="600">validate() 规则校验</text>
+    <text x="480" y="434" text-anchor="middle" font-size="11" fill="#52606d">字段 · 卡牌 · 满员动作 · 影响范围 · 0≤confidence≤1</text>
+    <line x1="670" y1="418" x2="724" y2="418" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text x="697" y="408" text-anchor="middle" font-size="11" fill="#3f8a55">校验通过</text>
+    <rect x="724" y="388" width="216" height="60" rx="8" fill="#eaf6ec" stroke="#3f8a55" stroke-width="1.2"/>
+    <text x="832" y="412" text-anchor="middle" font-size="13" font-weight="600">动作返回 GameSession</text>
+    <text x="832" y="432" text-anchor="middle" font-size="11" fill="#52606d">进入 game_engine 执行</text>
+    <line x1="480" y1="446" x2="480" y2="480" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text x="490" y="468" font-size="11" fill="#b04a3f">不通过 / 解析失败</text>
+    <rect x="300" y="480" width="360" height="58" rx="8" fill="#fff6e5" stroke="#b8802f" stroke-width="1.2"/>
+    <text x="480" y="504" text-anchor="middle" font-size="13" font-weight="600">携错重试（最多 2 次尝试）</text>
+    <text x="480" y="524" text-anchor="middle" font-size="11" fill="#52606d">校验失败附 reason · 解析失败附格式提醒</text>
+    <polyline points="300,509 240,509 240,238 284,238" fill="none" stroke="#b8802f" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+    <text x="248" y="372" font-size="11" fill="#b8802f">重试</text>
+    <line x1="480" y1="538" x2="480" y2="572" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text x="490" y="560" font-size="11" fill="#b04a3f">二次失败</text>
+    <rect x="270" y="572" width="420" height="58" rx="8" fill="#fdecea" stroke="#b04a3f" stroke-width="1.2"/>
+    <text x="480" y="596" text-anchor="middle" font-size="13" font-weight="600">RuleBrain 回退 → skip_ai_phase()</text>
+    <text x="480" y="616" text-anchor="middle" font-size="11" fill="#52606d">动作仍不可执行时跳过 AI 阶段（防卡死，计入回退率）</text>
+  </g>
+</svg>

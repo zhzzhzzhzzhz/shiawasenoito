@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="580" viewBox="0 0 960 580" role="img" aria-labelledby="title desc">
+  <title id="title">Good-side win rates by opponent difficulty</title>
+  <desc id="desc">Grouped bar chart comparing rule baseline, prompt baseline, Qwen3-8B fine-tuned, and DS-14B fine-tuned win rates at easy, normal, and hard difficulty.</desc>
+  <rect width="960" height="540" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#263238">
+    <text x="480" y="30" text-anchor="middle" font-size="20" font-weight="700">Good-side win rate by rule-AI difficulty</text>
+    <text x="22" y="260" transform="rotate(-90 22 260)" text-anchor="middle" font-size="14">Win rate (%)</text>
+    <text x="490" y="565" text-anchor="middle" font-size="14">Rule-AI difficulty</text>
+  </g>
+  <g stroke="#d9dee5" stroke-width="1" stroke-dasharray="5 5">
+    <line x1="70" y1="460" x2="920" y2="460"/>
+    <line x1="70" y1="380" x2="920" y2="380"/>
+    <line x1="70" y1="300" x2="920" y2="300"/>
+    <line x1="70" y1="220" x2="920" y2="220"/>
+    <line x1="70" y1="140" x2="920" y2="140"/>
+    <line x1="70" y1="60" x2="920" y2="60"/>
+  </g>
+  <g stroke="#455a64" stroke-width="1.5">
+    <line x1="70" y1="60" x2="70" y2="460"/>
+    <line x1="70" y1="460" x2="920" y2="460"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#52606d" text-anchor="end">
+    <text x="60" y="464">0</text><text x="60" y="384">20</text><text x="60" y="304">40</text>
+    <text x="60" y="224">60</text><text x="60" y="144">80</text><text x="60" y="64">100</text>
+  </g>
+  <g fill="#7a869a">
+    <rect x="100" y="104" width="45" height="356"/><rect x="390" y="212" width="45" height="248"/><rect x="680" y="268" width="45" height="192"/>
+  </g>
+  <g fill="#b8a1d9">
+    <rect x="150" y="140" width="45" height="320"/><rect x="440" y="228" width="45" height="232"/><rect x="730" y="300" width="45" height="160"/>
+  </g>
+  <g fill="#2f80ed">
+    <rect x="200" y="60" width="45" height="400"/><rect x="490" y="100" width="45" height="360"/><rect x="780" y="220" width="45" height="240"/>
+  </g>
+  <g fill="#e67e22">
+    <rect x="250" y="180" width="45" height="280"/><rect x="540" y="180" width="45" height="280"/><rect x="830" y="260" width="45" height="200"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#263238" text-anchor="middle">
+    <text x="122.5" y="97">89%</text><text x="412.5" y="205">62%</text><text x="702.5" y="261">48%</text>
+    <text x="172.5" y="133">80%</text><text x="462.5" y="221">58%</text><text x="752.5" y="293">40%</text>
+    <text x="222.5" y="53">100%</text><text x="512.5" y="93">90%</text><text x="802.5" y="213">60%</text>
+    <text x="272.5" y="173">70%</text><text x="562.5" y="173">70%</text><text x="852.5" y="253">50%</text>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#263238" text-anchor="middle">
+    <text x="197.5" y="485">easy</text><text x="487.5" y="485">normal</text><text x="777.5" y="485">hard</text>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#263238">
+    <rect x="150" y="515" width="12" height="12" fill="#7a869a"/><text x="168" y="526">Rule baseline</text>
+    <rect x="290" y="515" width="12" height="12" fill="#b8a1d9"/><text x="308" y="526">Prompt baseline</text>
+    <rect x="450" y="515" width="12" height="12" fill="#2f80ed"/><text x="468" y="526">Qwen3-8B FT</text>
+    <rect x="600" y="515" width="12" height="12" fill="#e67e22"/><text x="618" y="526">DS-14B FT</text>
+  </g>
+</svg>

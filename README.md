@@ -203,6 +203,13 @@ AGENT_LLM_MODEL=deepseek-chat
 - **不配 LLM 或 LLM 失败时自动回退规则 AI，对局永不卡死**
 - 创建房间时通过 `aiBackend` 参数选择大脑（`rule` / `agent` / `hybrid`）
 
+## AI 智能体系统
+
+- **数据管线**：546 条决策点自动分档（A99 / B251 / C148），构建 350 条 SFT 数据与 148 对 DPO 偏好数据；另采集 1818 条整局数据。
+- **微调方案**：采用 Qwen3-8B 与 DS-R1-Distill-14B 双底座，使用 QLoRA（4-bit NF4、LoRA rank 16、全投影层）在单卡 RTX 4090 上训练。
+- **分层评测**：建立 L0～L3 分层指标，并将 5% 回退率设为红线；横向比较规则、提示词与微调三条技术路线，8B 正派对 easy / normal / hard 的胜率分别为 100% / 90% / 60%。
+- **本地部署**：支持在 8GB 显存设备上运行，并已接入桌面端完整对局。论文全文、实验数据与图表见 [`thesis/`](thesis/)。
+
 ## 桌面端
 
 前端 React 代码通过 Electron 打包为桌面应用，`preload.js` 将 `config.json` 中的后端地址注入到 `window.__BACKEND_URL__`，前端 API 层自动走绝对地址连接后端：

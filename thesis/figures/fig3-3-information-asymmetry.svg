@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">信息不对称示意图</title>
+  <desc id="desc">引擎全量状态经视角过滤后：正派视角隐藏角色身份、删除 villainId、使用贝叶斯信念与前 5 嫌疑人；反派视角保留真实身份与完整行动空间。</desc>
+  <rect width="960" height="520" fill="#ffffff"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#455a64" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <g font-family="'Microsoft YaHei','PingFang SC',Arial,sans-serif" fill="#263238">
+    <rect x="40" y="90" width="270" height="310" rx="10" fill="#f2f4f7" stroke="#8a9bb0" stroke-width="1.2"/>
+    <text x="175" y="126" text-anchor="middle" font-size="14" font-weight="600">引擎全量状态（GameSession）</text>
+    <g font-size="13" fill="#37474f">
+      <circle cx="70" cy="163" r="3" fill="#8a9bb0"/><text x="84" y="168">role：真实身份（3 名反派）</text>
+      <circle cx="70" cy="203" r="3" fill="#8a9bb0"/><text x="84" y="208">villainId：死亡标记归属</text>
+      <circle cx="70" cy="243" r="3" fill="#8a9bb0"/><text x="84" y="248">board：25 格全量视图</text>
+      <circle cx="70" cy="283" r="3" fill="#8a9bb0"/><text x="84" y="288">行动卡：5 张完整信息</text>
+      <circle cx="70" cy="323" r="3" fill="#8a9bb0"/><text x="84" y="328">阶段 · 历史 · 玩家身份</text>
+    </g>
+    <text x="175" y="372" text-anchor="middle" font-size="11" fill="#8a9bb0">仅后端与校验器可见，不进正派观测</text>
+    <line x1="310" y1="260" x2="378" y2="260" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text x="344" y="248" text-anchor="middle" font-size="11" fill="#52606d">按阵营过滤</text>
+    <rect x="380" y="195" width="200" height="130" rx="10" fill="#fff6e5" stroke="#b8802f" stroke-width="1.2"/>
+    <text x="480" y="228" text-anchor="middle" font-size="14" font-weight="600">视角过滤</text>
+    <g font-size="11" fill="#52606d" text-anchor="middle">
+      <text x="480" y="254">get_public_board()</text>
+      <text x="480" y="276">_sanitize_reveal()</text>
+      <text x="480" y="298">encode_observation()</text>
+    </g>
+    <line x1="580" y1="238" x2="638" y2="188" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <line x1="580" y1="284" x2="638" y2="392" stroke="#455a64" stroke-width="1.6" marker-end="url(#arr)"/>
+    <rect x="640" y="100" width="280" height="170" rx="10" fill="#eef4fc" stroke="#4a6fa5" stroke-width="1.2"/>
+    <text x="780" y="130" text-anchor="middle" font-size="14" font-weight="600">正派视角（受限观测）</text>
+    <g font-size="12" fill="#37474f">
+      <text x="660" y="162">role → unknown（全员隐藏）</text>
+      <text x="660" y="192">villainId → 删除，仅保留形状</text>
+      <text x="660" y="222">belief.top5_suspects（后验概率）</text>
+      <text x="660" y="252">action_space：choose_3_surveillance</text>
+    </g>
+    <rect x="640" y="310" width="280" height="170" rx="10" fill="#eaf6ec" stroke="#3f8a55" stroke-width="1.2"/>
+    <text x="780" y="340" text-anchor="middle" font-size="14" font-weight="600">反派视角（完整身份）</text>
+    <g font-size="12" fill="#37474f">
+      <text x="660" y="372">role → 真实（可见 3 名队友）</text>
+      <text x="660" y="402">belief = None（无需推断）</text>
+      <text x="660" y="432">action_space：卡牌 · 槽位 · 目标</text>
+      <text x="660" y="462">重心：卡牌节奏 ／ 暴露控制</text>
+    </g>
+  </g>
+</svg>
